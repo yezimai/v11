@@ -97,7 +97,7 @@ class GetProjectDetailModelClass(BaseDbModelClass):
                 if len(res2) == 0:
                     print('wrong server_info-res2')
                     return ''
-        res1+=res2
+        res1 += res2
         print('whole-res,',res1)
         for v in res1:
             v_dic = dict()
@@ -139,54 +139,5 @@ class GetProjectDetailModelClass(BaseDbModelClass):
         dblog.info("v_dic88888 last: %s,file: [ %s ], line: [ %s ]" % (
             json.dumps(v_dic, indent=4), __file__, sys._getframe().f_lineno))
         return v_dic
-    # r_list=[]
-    #
-    # app_list=[]
-    # for v in data:
-    #     r_dic = {}
-    #     res_dic['project_name'] = v[0]
-    #     res_dic['project_code'] = v[1]
-    #     res_dic['project_id'] = v[2]
-    #     r_dic['name']=v[3]
-    #     r_dic['id']=v[4]
-    #     r_list.append(r_dic)
-    #     res_dic['apps']=r_list
-        #     #app_list.append(v[4])
-        # print('rdic<------>\033[32;1m%s\033[0m' % res_dic)
-        # #print('app_list<------>\033[32;1m%s\033[0m' % app_list)
-        # #2.找到权限对应环境相关信息
-        # #
-        # sql = '''SELECT b.type from auth_user a,op_app_group b,op_app_group_user ab \
-        #           WHERE a.id=%s and a.id=ab.user_id and ab.group_id=b.id'''
-        # try:
-        #     data = self._cursorQuery(sql,[self.user_id])
-        # except Exception as e:
-        #     dblog.error("[ERROR] Query error, Catch exception:[ %s ], file: [ %s ], line: [ %s ]" % (
-        #         e, __file__, sys._getframe().f_lineno))
-        # env_list = []
-        # print('envtpye999999',data)
-        # if data:
-        #     env_type_choices={
-        #         1:'dev',
-        #         2:'sit',
-        #         3:'uat',
-        #         4:'pre',
-        #         5:'prd',
-        #     }
-        #     for i in data:  #data=((2,), (1,))
-        #         env_dic={}
-        #         print('pppp',i)
-        #         index=i[0]
-        #         if index in  env_type_choices:
-        #             #env_type_name = env_type_choices[i]
-        #             env_dic['id'] = index
-        #             env_dic['name'] = env_type_choices[index]
-        #             env_dic['selected'] = 0
-        #             env_list.append(env_dic)
-        #             print('@@@@@@------',env_list)
-        # res_dic['envs'] = env_list
-        #
-        # print('resdic<------>\033[34;1m%s\033[0m' % res_dic)
-        #return res_dic
-        #return r_list
+
 
