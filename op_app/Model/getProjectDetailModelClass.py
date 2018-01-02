@@ -120,13 +120,13 @@ class GetProjectDetailModelClass(BaseDbModelClass):
             }
             if env_id in env_type_choices:
                 env_dic['name'] = env_type_choices[env_id]
-            # env_list = []
+
             if env_dic not in env_list:
                 env_list.append(env_dic)
 
                 print('<FFFFFFFFFFFFFF------>\033[32;1m%s\033[0m' % env_list)
 
-            # app_list = []
+
 
             if app_dic not in app_list:
                 app_list.append(app_dic)
