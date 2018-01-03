@@ -2,7 +2,7 @@
 # -*- coding: UTF-8 -*-
 
 import sys
-from shutil import copyfile
+import shutil
 from django.db import connections, connection
 from op_app.Model.base.baseModelClass import BaseDbModelClass
 from op_app.logger.log import dblog
@@ -84,22 +84,37 @@ class ManageActionModelClass(BaseDbModelClass):
             print('invalid AppType..')
             return False
         config_status = self.ConfigFile(ip, app_name, res_dic)
-        if config_status: # 配置文件构建成功
+        if config_status:  # 配置文件构建成功
             pass
 
     def ConfigFile(self, ip, app_name, r_dic):  # 构建配置文件
         current_dir = os.path.dirname(os.path.abspath(__file__))
-        config_dir = '{}{}{}{}{}'.format(current_dir, '/../../tasks/server_manage/', ip, '/',  app_name, '/scripts')
+        config_dir = '{}{}{}{}{}{}'.format(current_dir, '/../../tasks/server_manage/', ip, '/',  app_name, '/scripts')
         print('config_dir------>\033[44;1m%s\033[0m' % config_dir)
-        if not pub.createDir(config_dir):
-            print('---mkdir error')
-            return False
-
+        if not os.path.exists(config_dir):
+            try:
+                os.makedirs(config_dir)
+            except Exception as e:
+                print('---mkdir error')
+                dblog.error("[ERROR] mkdirs error, Catch exception:[ %s ], file: [ %s ], line: [ %s ]" % (
+                    e, __file__, sys._getframe().f_lineno))
+                return False
         # 将最新的start，stop脚本同步到config_dir
-        # os.path.join(current_dir, '/../../scripts')
+
         source_dir = '{}{}'.format(current_dir, '/../../scripts/client/service_manage/bin')
+
         try:
-            copyfile(source_dir,config_dir)  # 拷贝执行脚本到指定目录
+            for file in os.listdir(source_dir): # 获取目标文件夹的文件列表信息
+                #print(os.listdir(source_dir))
+                source_file = os.path.join(source_dir,file)
+                target_file = os.path.join(config_dir,file)
+
+                if os.path.isfile(source_file): # 判断是否为文件，真则写入到目标文件中
+                    open(target_file, "wb").write(open(source_file, "rb").read())
+                else:
+                    dblog.error("[ERROR] File--type error, Catch exception:, file: [ %s ], line: [ %s ]" % (
+                         __file__, sys._getframe().f_lineno))
+                    return False
         except IOError as e:
             print('Unable to copy file.%s' % e)
             return False
@@ -108,26 +123,29 @@ class ManageActionModelClass(BaseDbModelClass):
             return False
 
         # 写入配置文件
+        conf_file = '{}{}'.format(config_dir,'/conf')
+        print('0-0,',r_dic)
+        if not os.path.exists(conf_file):
+            os.makedirs(conf_file)
         try:
-            f = open(config_dir + '/conf/app_config.conf', 'w')
-            #f.write('pkgfile={0}'.format(REMOTE_BASE_DIR + dir_name + '/' + appname + '/pkg/' + dic['pkgname']) + '\n')
-            f.write('appnumber={0}'.format('1') + '\n')
-            f.write('projectname={0}'.format(r_dic['projectname']) + '\n')
-            f.write('ip={0}'.format(ip) + '\n')
-            f.write('user[1]={0}'.format(r_dic['install_user']) + '\n')
-            f.write('upgradetype[1]=full' + '\n')
-            f.write('apptype[1]={0}'.format(r_dic['apptype']) + '\n')
-            #f.write('backupdir[1]={0}'.format(REMOTE_BASE_DIR + dir_name + '/' + appname + '/backup') + '\n')
-            f.write('appdir[1]={0}'.format(r_dic['appdir']) + '\n')
-            f.write('appwarname[1]={0}'.format(r_dic['pkgname']) + '\n')
-            f.write('startuptime[1]=1000' + '\n')
-            f.write('port[1]={0}'.format(r_dic['port']) + '\n')
+            with open(conf_file+'/app_config.conf','w') as f:
+                #f.write('pkgfile={0}'.format(REMOTE_BASE_DIR + dir_name + '/' + appname + '/pkg/' + dic['pkgname']) + '\n')
+                f.write('appnumber={0}'.format('1'))
+                f.write('projectname={0}'.format(r_dic['projectname']) + '\n')
+                f.write('ip={0}'.format(ip) + '\n')
+                f.write('user[1]={0}'.format(r_dic['install_user']) + '\n')
+                f.write('upgradetype[1]=full' + '\n')
+                f.write('apptype[1]={0}'.format(r_dic['apptype']) + '\n')
+                #f.write('backupdir[1]={0}'.format(REMOTE_BASE_DIR + dir_name + '/' + appname + '/backup') + '\n')
+                f.write('appdir[1]={0}'.format(r_dic['appdir']) + '\n')
+                f.write('appwarname[1]={0}'.format(r_dic['pkgname']) + '\n')
+                f.write('startuptime[1]=1000' + '\n')
+                f.write('port[1]={0}'.format(r_dic['port']) + '\n')
         except Exception as e:
-            dblog.error("[ERROR] Query error, Catch exception:[ %s ], file: [ %s ], line: [ %s ]" % (
+            dblog.error("[ERROR] write to config file error, Catch exception:[ %s ], file: [ %s ], line: [ %s ]" % (
                 e, __file__, sys._getframe().f_lineno))
             return False
-        else:
-            f.close()  # 写入配置文件完成
+
         return True
 
 
