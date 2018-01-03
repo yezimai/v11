@@ -1,14 +1,14 @@
 #!/usr/bin/python
 # -*- coding: UTF-8 -*-
 
-import sys
-import shutil
-from django.db import connections, connection
 from op_app.Model.base.baseModelClass import BaseDbModelClass
 from op_app.logger.log import dblog
 from op_app.lib import pub
 import json
 import os
+import sys
+reload(sys)
+sys.setdefaultencoding('utf-8')
 
 class ManageActionModelClass(BaseDbModelClass):
 
@@ -128,19 +128,20 @@ class ManageActionModelClass(BaseDbModelClass):
         if not os.path.exists(conf_file):
             os.makedirs(conf_file)
         try:
-            with open(conf_file+'/app_config.conf','w') as f:
-                #f.write('pkgfile={0}'.format(REMOTE_BASE_DIR + dir_name + '/' + appname + '/pkg/' + dic['pkgname']) + '\n')
-                f.write('appnumber={0}'.format('1'))
-                f.write('projectname={0}'.format(r_dic['projectname']) + '\n')
-                f.write('ip={0}'.format(ip) + '\n')
-                f.write('user[1]={0}'.format(r_dic['install_user']) + '\n')
-                f.write('upgradetype[1]=full' + '\n')
-                f.write('apptype[1]={0}'.format(r_dic['apptype']) + '\n')
-                #f.write('backupdir[1]={0}'.format(REMOTE_BASE_DIR + dir_name + '/' + appname + '/backup') + '\n')
-                f.write('appdir[1]={0}'.format(r_dic['appdir']) + '\n')
-                f.write('appwarname[1]={0}'.format(r_dic['pkgname']) + '\n')
-                f.write('startuptime[1]=1000' + '\n')
-                f.write('port[1]={0}'.format(r_dic['port']) + '\n')
+            f = open(conf_file+'/app_config.conf','w')
+            #f.write('pkgfile={0}'.format(REMOTE_BASE_DIR + dir_name + '/' + appname + '/pkg/' + dic['pkgname']) + '\n')
+            f.write('appnumber={0}'.format('1')+'\n')
+            f.write('projectname={0}'.format(r_dic['projectname']) + '\n')
+            f.write('ip={0}'.format(ip) + '\n')
+            # f.write('projectname=%s'%r_dic['projectname'] + '\n')
+            f.write('user[1]={0}'.format(r_dic['install_user']) + '\n')
+            f.write('upgradetype[1]=full' + '\n')
+            f.write('apptype[1]={0}'.format(r_dic['apptype']) + '\n')
+            #f.write('backupdir[1]={0}'.format(REMOTE_BASE_DIR + dir_name + '/' + appname + '/backup') + '\n')
+            f.write('appdir[1]={0}'.format(r_dic['appdir']) + '\n')
+            f.write('appwarname[1]={0}'.format(r_dic['pkgname']) + '\n')
+            f.write('startuptime[1]=1000' + '\n')
+            f.write('port[1]={0}'.format(r_dic['port']) + '\n')
         except Exception as e:
             dblog.error("[ERROR] write to config file error, Catch exception:[ %s ], file: [ %s ], line: [ %s ]" % (
                 e, __file__, sys._getframe().f_lineno))
