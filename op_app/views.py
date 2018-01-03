@@ -6,7 +6,8 @@ from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render, redirect, render_to_response
 from Controllers.loginControllerClass import LoginControllerClass
 from op_app.Controllers import (getNavControllerClass, getProjectNavControllerClass,
-                                getProjectDetailControllerClass,getHostInfoControllerClass)
+                                getProjectDetailControllerClass,getHostInfoControllerClass,
+                                serviceManageActionControllerClass)
 def login(request):
     c_login = LoginControllerClass(request)
     return c_login.login()
@@ -157,61 +158,85 @@ def hostInfo(request):
         "data": [
             {
                 "ip": "10.0.0.2",
+                "server_type": 2,
+                "server_id": 1,
                 "env_name": "sit1",
                 "manager": "刘国华"
             },
             {
                 "ip": "10.0.0.3",
+                "server_type": 2,
+                "server_id": 2,
                 "env_name": "sit3",
                 "manager": "李华"
             },
             {
                 "ip": "10.0.0.4",
+                "server_type": 2,
+                "server_id": 3,
                 "env_name": "sit4",
                 "manager": "游昌永"
             },
             {
                 "ip": "10.0.0.5",
+                "server_type": 2,
+                "server_id": 4,
                 "env_name": "sit5",
                 "manager": "游昌永"
             },
             {
                 "ip": "10.0.0.6",
+                "server_type": 2,
+                "server_id": 5,
                 "env_name": "sit1",
                 "manager": "李智军"
             },
             {
                 "ip": "10.0.0.7",
+                "server_type": 2,
+                "server_id": 6,
                 "env_name": "sit1",
                 "manager": "游昌永"
             },
             {
                 "ip": "10.0.0.8",
+                "server_type": 2,
+                "server_id": 7,
                 "env_name": "sit7",
                 "manager": "刘国华"
             },
             {
                 "ip": "10.0.0.9",
+                "server_type": 2,
+                "server_id": 8,
                 "env_name": "sit1",
                 "manager": "李智军"
             },
             {
                 "ip": "10.0.0.10",
+                "server_type": 2,
+                "server_id": 9,
                 "env_name": "sit1",
                 "manager": "刘国华"
             },
             {
                 "ip": "10.0.0.11",
+                "server_type": 2,
+                "server_id": 10,
                 "env_name": "sit1",
                 "manager": "游昌永"
             },
             {
                 "ip": "10.0.0.12",
+                "server_type": 2,
+                "server_id": 11,
                 "env_name": "sit1",
                 "manager": "刘国华"
             },
             {
                 "ip": "10.0.0.13",
+                "server_type": 2,
+                "server_id": 12,
                 "env_name": "sit1",
                 "manager": "李智军"
             },
@@ -222,7 +247,7 @@ def hostInfo(request):
     data = dict()
     data['data'] = res
 
-    print('1111111111111data:', data)
+    #print('1111111111111data:', data)
     return JsonResponse(data, safe=False)
 
 def doServiceManageAction(request):
@@ -252,7 +277,7 @@ def doServiceManageAction(request):
             f.write('appnumber={0}'.format('1') + '\n')
             f.write('projectname={0}'.format(data[1]) + '\n')
             f.write('ip={0}'.format(ip) + '\n')
-            f.write('user[1]={0}'.format(dic['name']) + '\n')
+            f.write('user[1]={0}'.format(dic['install_user']) + '\n')
             f.write('upgradetype[1]=full' + '\n')
             f.write('apptype[1]=tomcat' + '\n')
             f.write('backupdir[1]={0}'.format(REMOTE_BASE_DIR + dir_name + '/' + appname + '/backup') + '\n')
@@ -267,6 +292,8 @@ def doServiceManageAction(request):
 
     '''
     import time
+    i_class = serviceManageActionControllerClass.ManageActionControllerClass(request)
+    res = i_class.getAction()
     time.sleep(5)
     return JsonResponse('ok', safe=False)
 
@@ -277,18 +304,32 @@ def doFunctionPage(request):
     :param request:
     :return:
     '''
-    project_id = request.GET.get('project_id', '0')
-    env_id = request.GET.get('env_id', '')
-    app_id = request.GET.get('app_id', '')
-    ip = request.GET.get('ip', '')
+    # project_id = request.GET.get('project_id', '0')
+    # env_id = request.GET.get('env_id', '')
+    # app_id = request.GET.get('app_id', '')
+    # ip = request.GET.get('ip', '')
     action = request.GET.get('action', '')
-    if action == 'log_show': # 日志查看
-        return render(request, 'manage/log_show.html', {'data': 'test log_show'})
-    elif action == 'task_manage': # 任务管理
+    if action == 'log_show':  # 日志查看
+        data = {
+            'id': 1,
+            'ip': '10.0.0.1',
+            'user': 'user1',
+            'logdirs': [
+                {
+                    'id': 11,
+                    'dir': '/usr/local/tomcat8080/logs'
+                },{
+                    'id': 12,
+                    'dir': '/usr/local/tomcat8081/logs'
+                }
+            ],
+        }
+        return render(request, 'manage/log_show.html', {'data': data})
+    elif action == 'task_manage':  # 任务管理
         return render(request, 'manage/task_manage.html', {'data': 'test task_manage'})
-    elif action == 'run_command': # 命令执行
+    elif action == 'run_command':  # 命令执行
         return render(request, 'manage/run_command.html', {'data': 'test run_command'})
-    elif action == 'machine_detail': # 机器详情
+    elif action == 'machine_detail':  # 机器详情
         return render(request, 'manage/machine_detail.html', {'data': 'test machine_detail'})
     else:
         return render(request, '404.html', {'data': 'test 404'})
@@ -312,7 +353,112 @@ def getLogDetail(request):
     return render(request, 'manage/logdetail.html', {'data': data})
 
 
+def getLogInfo(request):
+    data = {
+        'data': [
+                {
+                    'no': '1',
+                    'file': 'catalina.out',
+                    'owner': 'beehive',
+                    'group': 'group1',
+                    'size': '322972',
+                    'last_modify': '2017-12-08 15:33:40',
+                }, {
+                    'no': '2',
+                    'file': '2.catalina.out',
+                    'owner': 'beehive',
+                    'group': 'group1',
+                    'size': '322966',
+                    'last_modify': '2017-12-08 15:33:40',
+                },                {
+                    'no': '3',
+                    'file': '3.catalina.out',
+                    'owner': 'beehive',
+                    'group': 'group1',
+                    'size': '322972',
+                    'last_modify': '2017-12-08 15:33:40',
+                }, {
+                    'no': '4',
+                    'file': '4.catalina.out',
+                    'owner': 'beehive',
+                    'group': 'group1',
+                    'size': '322966',
+                    'last_modify': '2017-12-08 15:33:40',
+                }, {
+                    'no': '5',
+                    'file': '5.catalina.out',
+                    'owner': 'beehive',
+                    'group': 'group1',
+                    'size': '322972',
+                    'last_modify': '2017-12-08 15:33:40',
+                }, {
+                    'no': '6',
+                    'file': '6.catalina.out',
+                    'owner': 'beehive',
+                    'group': 'group1',
+                    'size': '322966',
+                    'last_modify': '2017-12-08 15:33:40',
+                },{
+                    'no': '7',
+                    'file': '7.catalina.out',
+                    'owner': 'beehive',
+                    'group': 'group1',
+                    'size': '322972',
+                    'last_modify': '2017-12-08 15:33:40',
+                }, {
+                    'no': '8',
+                    'file': '8.catalina.out',
+                    'owner': 'beehive',
+                    'group': 'group1',
+                    'size': '322966',
+                    'last_modify': '2017-12-08 15:33:40',
+                },{
+                    'no': '9',
+                    'file': '9.catalina.out',
+                    'owner': 'beehive',
+                    'group': 'group1',
+                    'size': '322972',
+                    'last_modify': '2017-12-08 15:33:40',
+                }, {
+                    'no': '10',
+                    'file': '10.catalina.out',
+                    'owner': 'beehive',
+                    'group': 'group1',
+                    'size': '322966',
+                    'last_modify': '2017-12-08 15:33:40',
+                },{
+                    'no': '11',
+                    'file': '11.catalina.out',
+                    'owner': 'beehive',
+                    'group': 'group1',
+                    'size': '322972',
+                    'last_modify': '2017-12-08 15:33:40',
+                }, {
+                    'no': '12',
+                    'file': '12.catalina.out',
+                    'owner': 'beehive',
+                    'group': 'group1',
+                    'size': '322966',
+                    'last_modify': '2017-12-08 15:33:40',
+                },{
+                    'no': '13',
+                    'file': '13.catalina.out',
+                    'owner': 'beehive',
+                    'group': 'group1',
+                    'size': '322972',
+                    'last_modify': '2017-12-08 15:33:40',
+                }, {
+                    'no': '14',
+                    'file': '14.catalina.out',
+                    'owner': 'beehive',
+                    'group': 'group1',
+                    'size': '322966',
+                    'last_modify': '2017-12-08 15:33:40',
+                }
+            ]
+    }
 
+    return JsonResponse(data, safe=False)
 
 
 

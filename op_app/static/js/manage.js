@@ -20,9 +20,6 @@ $(function(){
         }
     }
 
-    // 显示host 主机信息
-//    function show_datatable(){
-//    }
     $("#table2_demo4").dataTable({
         autoWidth: false,
         lengthChange: true, //不允许用户改变表格每页显示的记录数
@@ -69,6 +66,8 @@ $(function(){
             data = row.data();
         console.log('data:', data);
         var action_value = $(_this).attr('value');
+        var server_type = data.server_type;
+        var server_id = data.server_id;
         console.log('action_value:', action_value);
         var action_params = '?project_id='+ $('#project_id').val() + '&env_id=' + g_val.env_id + '&app_id=' + g_val.app_id + '&ip='+ data.ip +'&action=' + action_value;
         if (action_value == 'start' || action_value == 'stop' ){
@@ -82,6 +81,8 @@ $(function(){
                         app_id :  g_val.app_id,
                         ip :  data.ip,
                         action :  action_value,
+                        server_type: server_type,
+                        server_id: server_id
                     },
                     beforeSend:function(jqXR, settings){
                         $(_this).attr('href', '/op/getLogDetail/' + action_params);
@@ -125,16 +126,13 @@ $(function(){
         var _this = this;
         g_val.env_id = $(_this).attr('value');
         console.log('select env_id:', g_val.env_id);
-        $(_this).removeClass('king-success');
-
+        $(_this).removeClass('king-success').addClass('selected');
 
         // 更改选中效果
         $(_this).parent().find('.my-btn').each(function(i){
             if ($(this).html() != $(_this).html()){
                 $(this).removeClass('king-success').addClass('king-success');
                 $(this).removeClass('selected');
-            }else {
-                $(_this).removeClass('selected').addClass('selected');
             }
         });
 

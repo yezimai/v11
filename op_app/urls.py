@@ -25,6 +25,9 @@ urlpatterns = [
     url(r'^getLogDetail/$', getLogDetail, name='getLogDetail'),
     url(r'^doFunctionPage/$', doFunctionPage, name='doFunctionPage'),
 
+    ### 日志查看  #####
+    url(r'^getLogInfo/$', getLogInfo, name='getLogInfo'),
+
 
     ### 发布 ###
     url(r'^release/$', release, name='release'),

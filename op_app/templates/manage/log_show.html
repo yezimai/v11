@@ -1,10 +1,73 @@
-<!DOCTYPE html>
+{% load staticfiles %}
+
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>日志查看</title>
+    <title>运维平台-管理-机器详情页面</title>
+
+    <link rel="icon" href="{% static 'img/manage.ico' %}" type="image/x-icon">
+
+    <link rel="stylesheet" href="{% static 'static/assets/bootstrap-3.3.4/css/bootstrap.min.css' %}">
+    <link rel="stylesheet" href="{% static 'static/assets/bk/css/bk.css' %}">
+    <link rel="stylesheet" href="{% static 'static/assets/bk/css/base/common.css' %}">
+    <link rel="stylesheet" href="{% static 'static/assets/bk/css/components/button.css' %}">
+    <link rel="stylesheet" href="{% static 'static/assets/fontawesome/css/font-awesome.min.css' %}">
+    <link rel="stylesheet" href="{% static 'static/assets/datatables-1.10.7/dataTables.bootstrap.css' %}">
+
+    <link rel="stylesheet" href="{% static 'css/showlog.css' %}">
 </head>
 <body>
-日志查看
+
+    <div class="div-showlog-main" data-options="closable:true"  style="">
+        <div class="div-select">
+            <span class="title">选择日志目录：</span>
+            <select class="select-log">
+                {% for e_dir in data.logdirs %}
+                <option value="{{ e_dir.id }}">{{ e_dir.dir }}</option>
+                {% endfor %}
+            </select>
+            <a class="king-btn-demo king-btn king-radius king-info btn" >选择</a>
+        </div>
+        <div class="show-info">
+            <div class="info-detail">
+                <div class="left">
+                    <span class="title">主机:</span>
+                    <span class="content green">{{ data.ip }}</span>
+                </div>
+                <div class="right">
+                    <span class="title">用户:</span>
+                    <span class="content green">{{ data.user }}</span>
+                </div>
+                <div class="clear"></div>
+            </div>
+            <input id="id" name="id" type="hidden" value="{{ data.id }}">
+        </div>
+
+        <div class="detail-list" style="display:block;">
+            <table id="table2_demo4" class="table table-bordered table-striped">
+                <thead>
+                    <tr>
+                        <th class="table-head">序号</th>
+                        <th class="table-head">文件</th>
+                        <th class="table-head">所有者</th>
+                        <th class="table-head">所属组</th>
+                        <th class="table-head">大小</th>
+                        <th class="table-head">最后修改时间</th>
+                        <th class="table-head" style="text-align:center;">操作</th>
+                    </tr>
+                </thead>
+            </table>
+        </div>
+    </div>
 </body>
+
+
+<script src="{% static 'static/assets/js/jquery-1.10.2.min.js' %}"></script>
+<script src="{% static 'static/assets/datatables-1.10.7/jquery.dataTables.js' %}"></script>
+<script src="{% static 'static/assets/datatables-1.10.7/dataTables.bootstrap.js' %}"></script>
+<script src="{% static 'js/showlog.js' %}"></script>
+
 </html>
+
+
+
