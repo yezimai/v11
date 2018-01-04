@@ -1,10 +1,132 @@
-<!DOCTYPE html>
+{% load staticfiles %}
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>任务管理</title>
+    <title>运维平台-管理-任务管理</title>
+
+    <link rel="icon" href="{% static 'img/jiazhi2.ico' %}" type="image/x-icon">
+
+    <link rel="stylesheet" href="{% static 'static/assets/bk/css/bk.css' %}">
+    <link rel="stylesheet" href="{% static 'static/assets/bk/css/base/common.css' %}">
+    <link rel="stylesheet" href="{% static 'static/assets/bk/css/components/button.css' %}">
+    <link rel="stylesheet" href="{% static 'static/assets/fontawesome/css/font-awesome.min.css' %}">
+    <link rel="stylesheet" href="{% static 'static/assets/datatables-1.10.7/dataTables.bootstrap.css' %}">
+
+    <link href="{% static 'static/assets/artDialog-6.0.4/css/ui-dialog.css' %}" rel="stylesheet">
+    <link href="{% static 'static/assets/toastr-2.1.2/toastr.min.css' %}" rel="stylesheet">
+
+    <style type="text/css">
+        .clear {
+            clear:both;
+        }
+        .task-main{
+            //border: 1px solid #ccc;
+        }
+        .task-main .task-remark{
+            min-height:120px;
+            //border: 1px solid #ccc;
+        }
+        .task-main .task-remark .textarea-remark{
+            min-height:120px;
+            width: 100%;
+            border: 1px solid #ccc;
+        }
+        .task-main .task-actions{
+            padding: 15px;
+        }
+        .task-main .task-actions .links{
+            float: right;
+            margin: 0 20px 0 0;
+        }
+        .task-main .task-actions .links a{
+            display: inline-block;
+            margin: 0 20px 0 0;
+        }
+        .task-main .task-content{
+            min-height: 200px;
+            border: 1px solid #ccc;
+        }
+        .textarea-remark {
+            min-height:
+        }
+        .crontab-textarea {
+            width:100%;
+            height:100%;
+            border:none;
+            background:#eee;
+            font-size:15px;
+            //cursor:text;
+            outline:none;
+        }
+    </style>
+
 </head>
 <body>
-任务管理
+    <input id="project_id" type="hidden" value="{{ data.project_id }}">
+    <input id="env_id" type="hidden" value="{{ data.env_id }}">
+    <input id="app_id" type="hidden" value="{{ data.app_id }}">
+    <input id="server_type" type="hidden" value="{{ data.server_type }}">
+    <input id="server_id" type="hidden" value="{{ data.server_id }}">
+    <div class="task-main">
+        <span class="title">crontab 说明</span>
+        <div class="task-remark">
+            <textarea class="textarea-remark" readonly="readonly" >
+crontab file [-u user]-用指定的文件替代目前的crontab。
+crontab-[-u user]-用标准输入替代目前的crontab.
+crontab-1[user]-列出用户目前的crontab.
+crontab-e[user]-编辑用户目前的crontab.
+crontab-d[user]-删除用户目前的crontab.
+crontab-c dir- 指定crontab的目录。
+crontab文件的格式：M H D m d cmd.
+M: 分钟（0-59）。
+H：小时（0-23）。
+D：天（1-31）。
+m: 月（1-12）。
+例子 :
+#每天早上7点执行一次 /bin/ls :
+0 7 * * * /bin/ls
+在 12 月内, 每天的早上 6 点到 12 点中，每隔3个小时执行一次 /usr/bin/backup :
+0 6-12/3 * 12 * /usr/bin/backup
+周一到周五每天下午 5:00 寄一封信给 alex@domain.name :
+0 17 * * 1-5 mail -s "hi" alex@domain.name < /tmp/maildata
+每月每天的午夜 0 点 20 分, 2 点 20 分, 4 点 20 分....执行 echo "haha"
+20 0-23/2 * * * echo "haha"
+注意 :
+当程序在你所指定的时间执行后，系统会寄一封信给你，显示该程序执行的内容，若是 你不希望收到这样的信，请在每一行空一格之
+后加上 > /dev/null 2>&1 即可
+例子2 :
+#每天早上6点10分
+10 6 * * * date
+#每两个小时
+0 */2 * * * date
+#晚上11点到早上8点之间每两个小时，早上8点
+0 23-7/2，8 * * * date
+#每个月的4号和每个礼拜的礼拜一到礼拜三的早上11点
+0 11 4 * mon-wed date
+#1月份日早上4点
+0 4 1 jan * date
+            </textarea>
+        </div>
+        <div class="task-actions">
+            <div class="links">
+                <a id="cron_edit" class="king-btn-demo king-btn king-radius king-info my-btn app-name" >编辑</a>
+                <a id="cron_save" class="king-btn-demo king-btn king-radius king-success my-btn app-name" >保存</a>
+                <a id="cron_cancel" class="king-btn-demo king-btn king-radius king-warning my-btn app-name" >取消</a>
+            </div>
+            <div class="clear"></div>
+        </div>
+        <div class="task-content">
+            <textarea id="textarea_content" class="crontab-textarea" readonly="readonly" >
+                {{ data.content }}
+            </textarea>
+        </div>
+    </div>
 </body>
+
+<script src="{% static 'static/assets/js/jquery-1.10.2.min.js' %}"></script>
+<script src="{% static 'static/assets/toastr-2.1.2/toastr.min.js' %}"></script>
+<script src="{% static 'static/assets/artDialog-6.0.4/dist/dialog-min.js' %}"></script>
+
+<script src="{% static 'js/task_manage.js' %}"></script>
+
 </html>

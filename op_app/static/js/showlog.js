@@ -1,11 +1,4 @@
 $(function(){
-//    alert('dddddd');
-//    $('#action_table tbody').bind('click', '.btn-show', function(e){
-//        alert('show');
-//    });
-//    $('#action_table tbody').bind('click', '.btn-download', function(e){
-//        alert('download');
-//    });
 
     var language = {
         search: '搜索：',
@@ -22,13 +15,27 @@ $(function(){
         }
     }
 
+    var params = '?project_id='+ $('#project_id').val() +'&env_id=' + $('#env_id').val() + '&app_id=' + $('#app_id').val() + '&ip='+ $('#ip').val() + '&logdir_id='+ $('.select-log').val();
+
+    /* 表格内容获取 */
     $("#table2_demo4").dataTable({
-        autoWidth: true,
+        autoWidth: false,
         lengthChange: true,       //不允许用户改变表格每页显示的记录数
         pageLength : 10,          //每页显示几条数据
         lengthMenu: [10, 20, 40], //每页显示选项
         pagingType: 'full_numbers',
-        ajax : '/op/getLogInfo/',
+        ajax : '/op/getLogInfo/' + params,
+//        ajax: {
+//            "url": '/op/getLogInfo/',
+//            "type": "POST",
+//            "data": {
+//                project_id : $('#project_id').val(),
+//                env_id : $('#env_id').val(),
+//                app_id : $('#app_id').val(),
+//                ip : $('#ip').val(),
+//                logdir_id: $('.select-log').val()
+//            },
+//        },
         ordering: true,
         columns : [
           {data:"no", orderable: true},
@@ -51,34 +58,14 @@ $(function(){
         language:language
     });
 
-
+    /* 点击切换日志目录获取日志信息 */
     $('#ok').bind('click', function(e){
-        $.ajax({                             // 提交数据表单
-            type:'POST',
-            url : '/show/getDirFilesDetails/',
-            data : {
-                id : $('#id').val(),
-                dirname : $.trim($('.select-log').find('option:selected').text()),
-            },
-            beforeSend:function(jqXR, settings){
-                $.messager.progress();
-                $('tbody').find('tr').remove();
-            },
-            success:function(data){
-                $.messager.progress('close');
-                console.log(data);
-                loaddatasuccess();
-            },
-            error : function(XMLHttpRequest, textStatus, errorThrown) {
-                $.messager.progress('close');
-                $.messager.show({
-                    title:'提示',
-                    msg:'获取日志文件失败！，错误信息：' + errorThrown,
-                    showType: 'slide',
-                    timeout: 3000
-                });
-            },
-        });
+
+        // 重新获取表格数据
+        var t = $("#table2_demo4").DataTable();
+        var params = '?project_id='+ $('#project_id').val() +'&env_id=' + $('#env_id').val() + '&app_id=' + $('#app_id').val() + '&ip='+ $('#ip').val() + '&logdir_id='+ $('.select-log').val();
+        var ajax_url ='/op/getLogInfo/';
+        t.ajax.url(ajax_url + params).load();
     });
 
     function loaddatasuccess(){
@@ -103,6 +90,7 @@ $(function(){
             }
         });
 
+        /* 下载点击 */
         $('a[name="download"]').bind('click', function(e){
             var _this = $(this)
             var id = $('#id').val();

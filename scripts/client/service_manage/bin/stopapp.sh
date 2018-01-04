@@ -45,6 +45,9 @@ main(){
         return 1
     fi
     log_echo "[info] Enter ${func} with successed ." 
+    
+    check || return 1
+    
     log_echo "[info]" "Starting test program currently running the user"
     
     # 检测当前执行用户非root
@@ -63,6 +66,17 @@ main(){
     log_echo "[info]" "Exit func ${func} with successed."
     log_echo "[info]" "停止应用成功或未发现java进程 || Stop the application successful or not find Java process "
     return 0 
+}
+
+check(){
+    typeset func=main
+    log_echo "[info] Enter ${func} with successed ." 
+    mkdir -p ${LOG_DIR} ${TEMP_DIR}
+    if [ ! -f "${LOG_FILE}" ];then
+        > "${LOG_FILE}"
+    fi
+    log_echo "[info]" "Exit func ${func} with successed."
+    return 0
 }
 
 main $* || exit 1

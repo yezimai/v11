@@ -43,7 +43,7 @@ class GetProjectModelClass(BaseDbModelClass):
             print('<------>\033[32;1m%s\033[0m' %len(data))
             dblog.info('data is: %s, file: [ %s ], line: [ %s ]' % (data, __file__, sys._getframe().f_lineno))
             if len(data) == 0:
-                dblog.error('data is None , file: [ %s ], line: [ %s ]' % (__file__, sys._getframe().f_lineno))
+                dblog.error('project data is None , file: [ %s ], line: [ %s ]' % (__file__, sys._getframe().f_lineno))
                 return []
             for v in data:
                 if int(v[0]) == 2:  # 虚拟机
@@ -176,8 +176,7 @@ class GetProjectModelClass(BaseDbModelClass):
                   from cmdb_project p  -- 项目表
                   where p.code in (%s)'''
         try:
-            print('in_p',in_p)
-            data = self._cursorQuery(sql % in_p, final_list)
+            data = self._cursorQuery(sql %in_p,final_list)
             dblog.info(
                 'datajiaoji is: %s, file: [ %s ], line: [ %s ]' % (data, __file__, sys._getframe().f_lineno))
         except Exception as e:

@@ -42,6 +42,7 @@ class ParamikoTool(object):
             ret_list = []
         return ret_list
 
+
     # 列出远程服务器端文件
     def listRemoteFilesforversion(self,version_no,hostname,port,username,password,remote_dir):
         ret_list = []
@@ -81,6 +82,40 @@ class ParamikoTool(object):
             print "Error code :[568456x], Exception : [ " + str(e) + " ]"
             ret_list = []
         return ret_list
+
+    def execCommand(self, ip, username, port, password, cmdlist):
+        if len(cmdlist) == 0:
+            print "======  execCommandInRemoteHost parameters error  ========"
+            return 'false'
+        try:
+            ssh = paramiko.SSHClient()
+            ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+            ssh.connect(str(ip), int(port), str(username), str(password))
+
+            stdin, stdout, stderr = ssh.exec_command(command=cmdlist)
+            channel = stdout.channel
+            status = channel.recv_exit_status()
+            print status
+            err = stderr.read()  # 标准错误输出
+            try:
+                if err != '':
+                    print "=========== 错误信息 1：" + str(err).decode('utf-8')
+                    self.returnresult+=1
+                    return 'false'
+                else:
+                    stdread = stdout.read().decode('utf-8')
+                    print "===== 输出信息 ：[ " + str(stdread) + " ] ======"
+            except Exception, e:
+                print "=========== 错误信息 3：" + str(e)
+                self.returnresult += 1
+                return 'false'
+            ssh.close()
+        except Exception, e:
+            print "=========== 错误信息 4：" + str(e)
+            self.returnresult += 1
+            return 'false'
+        return 'true'
+
 
 
     # 封装在远程机器上执行命令的接口 cmdlist = [['chmod', '+x', '/home/a.sh'], ['chmod', '+x', '/home/b.sh']

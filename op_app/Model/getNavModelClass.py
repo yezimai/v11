@@ -29,7 +29,7 @@ class GetNavModelClass(BaseDbModelClass):
             try:
                 res = self._cursorQuery(sql, [id, code])
                 print 'navinfo!!!!!',res
-                if len(res) < 0:
+                if len(res) == 0:
                     dblog.error('navinfo is None , file: [ %s ], line: [ %s ]' % (__file__, sys._getframe().f_lineno))
                     return []
             except Exception as e:

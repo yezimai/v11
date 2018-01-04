@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <title>运维平台-管理-机器详情页面</title>
 
-    <link rel="icon" href="{% static 'img/manage.ico' %}" type="image/x-icon">
+    <link rel="icon" href="{% static 'img/jiazhi3.ico' %}" type="image/x-icon">
 
     <link rel="stylesheet" href="{% static 'static/assets/bootstrap-3.3.4/css/bootstrap.min.css' %}">
     <link rel="stylesheet" href="{% static 'static/assets/bk/css/bk.css' %}">
@@ -17,6 +17,10 @@
     <link rel="stylesheet" href="{% static 'css/showlog.css' %}">
 </head>
 <body>
+    <input id="project_id" type="hidden" value="{{ data.project_id }}">
+    <input id="env_id" type="hidden" value="{{ data.env_id }}">
+    <input id="app_id" type="hidden" value="{{ data.app_id }}">
+    <input id="ip" type="hidden" value="{{ data.ip }}">
 
     <div class="div-showlog-main" data-options="closable:true"  style="">
         <div class="div-select">
@@ -26,7 +30,7 @@
                 <option value="{{ e_dir.id }}">{{ e_dir.dir }}</option>
                 {% endfor %}
             </select>
-            <a class="king-btn-demo king-btn king-radius king-info btn" >选择</a>
+            <a id="ok" class="king-btn-demo king-btn king-radius king-info btn" >选择</a>
         </div>
         <div class="show-info">
             <div class="info-detail">
@@ -40,7 +44,6 @@
                 </div>
                 <div class="clear"></div>
             </div>
-            <input id="id" name="id" type="hidden" value="{{ data.id }}">
         </div>
 
         <div class="detail-list" style="display:block;">

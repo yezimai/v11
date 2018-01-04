@@ -49,6 +49,7 @@ $(function(){
                           <li><a target="_blank" class="click-btn" value="log_show" href="#">日志查看</a></li>
                           <li><a target="_blank" class="click-btn" value="task_manage" href="#">任务管理</a></li>
                           <li><a target="_blank" class="click-btn" value="run_command" href="#">命令执行</a></li>
+                          <li><a target="_blank" class="click-btn" value="configuration" href="#">配置文件更改</a></li>
                           <li><a target="_blank" class="click-btn" value="machine_detail" href="#">机器详情</a></li>
                         </ul>
                     </div>`
@@ -61,7 +62,12 @@ $(function(){
 
     var t = $("#table2_demo4").DataTable();  // 获取datatables对象
     $("#table2_demo4 tbody").on('click', 'a.click-btn', function(e){
-        var _this = this
+        var _this = this;
+
+        /* 获取所有row  */
+//        var all_rows = $('tbody').find('tr');
+//        alert(all_rows.length);
+
         var row = t.row( $(_this).parents('tr') ), // 获取按钮所在的行
             data = row.data();
         console.log('data:', data);
@@ -69,7 +75,13 @@ $(function(){
         var server_type = data.server_type;
         var server_id = data.server_id;
         console.log('action_value:', action_value);
-        var action_params = '?project_id='+ $('#project_id').val() + '&env_id=' + g_val.env_id + '&app_id=' + g_val.app_id + '&ip='+ data.ip +'&action=' + action_value;
+        var action_params = '?project_id='+ $('#project_id').val() +
+                                '&env_id=' + g_val.env_id +
+                                '&app_id=' + g_val.app_id +
+                                '&ip='+ data.ip +
+                                '&action=' + action_value +
+                                '&server_type=' + server_type +
+                                '&server_id=' + server_id;
         if (action_value == 'start' || action_value == 'stop' ){
             if(confirm('确定要' + action_value + ' ?')){
                 $.ajax({

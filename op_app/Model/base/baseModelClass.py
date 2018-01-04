@@ -15,7 +15,7 @@ class BaseDbModelClass(object):
             self.cursor.execute(sql, parlist)
             return self.cursor.fetchall()
         except Exception as e:
-            print("[ERROR] Query error, Catch exception:[ %s ], file: [ %s ], line: [ %s ],sql:[%s]" % (e, __file__, sys._getframe().f_lineno,sql))
+            print("[ERROR] Query error, Catch exception:[ %s ], file: [ %s ], line: [ %s ]" % (e, __file__, sys._getframe().f_lineno))
             return ''
 
     ## 插入接口  ##
