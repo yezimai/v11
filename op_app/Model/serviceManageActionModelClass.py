@@ -81,7 +81,7 @@ class ManageActionModelClass(BaseDbModelClass):
             res_dic['appdir'] = i[3]
             res_dic['pkgname'] = i[4]
             res_dic['port'] = i[5]
-            app_name = i[6]
+            self.app_name = i[6]
             res_dic['pass'] = i[7]
             res_dic['sshport'] = i[8]
         if app_type == '1':
@@ -92,11 +92,19 @@ class ManageActionModelClass(BaseDbModelClass):
             print('invalid AppType..')
             return False
         print('123123123',res_dic)
-        config_status = self.ConfigFile(ip, app_name, **res_dic)
+        config_status = self.ConfigFile(ip, self.app_name, **res_dic)
         if config_status:  # 配置文件构建成功
 
             if self.rsyncFile(ip,**res_dic) :   #同步文件到远程机器
                 print('rsync-succ----->\033[31;1m\033[0m')
+
+            else:
+                print('rsync-fail----->\033[31;1m\033[0m')
+                return False
+        else:
+            print('configFile create error..123')
+            return False
+
 
     def ConfigFile(self, ip, app_name, **r_dic):  # 构建配置文件
         print('ip!!!-----!!!!!!', ip)
@@ -146,7 +154,7 @@ class ManageActionModelClass(BaseDbModelClass):
             f = open(conf_file+'/app_config.conf','w')
             #f.write('pkgfile={0}'.format(REMOTE_BASE_DIR + dir_name + '/' + appname + '/pkg/' + dic['pkgname']) + '\n')
             f.write('appnumber={0}'.format('1')+'\n')
-            f.write('projectname={0}'.format(r_dic['projectname']) + '\n')
+            f.write('projectcode={0}'.format(r_dic['projectcode']) + '\n')
             f.write('ip={0}'.format(ip) + '\n')
             # f.write('projectname=%s'%r_dic['projectname'] + '\n')
             f.write('user[1]={0}'.format(r_dic['install_user']) + '\n')
@@ -169,19 +177,19 @@ class ManageActionModelClass(BaseDbModelClass):
 
 
     def rsyncFile(self, ip, **r_dic):
-        # 首先判断远程目录是否存在
         username = r_dic['install_user']
         dest_dir = '${HOME}/service_manage/'
         sshport = r_dic['sshport']
         password = r_dic['pass']
-        pt = ParamikoTool()
-        status = pt.remoteHostHasDir(ip, username, sshport, password, dest_dir)
-        # print 'remote_dirremote_dir,'
-        if not status:
-            return False
-        #利用rsync脚本将配置文件和启动脚本推送过去
-        remote_dir = '{}/{}/{}/'.format('/home',username,'service_manage')
-        connect_args = [ip, username, sshport, password, self.app_path, remote_dir]
+        # 首先判断远程目录是否存在
+        # pt = ParamikoTool()
+        # status = pt.remoteHostHasDir(ip, username, sshport, password, dest_dir)
+        # # print 'remote_dirremote_dir,'
+        # if not status:
+        #     return False
+        #利用rsync脚本将配置文件和启动脚本推送过去,rsync可以自动创建文件夹，所以注释掉上面的代码
+        self.remote_dir = '{}/{}/{}/'.format('/home',username,'service_manage')
+        connect_args = [ip, username, sshport, password, self.app_path, self.remote_dir]
         if pub.rsyncServerToClients(self.rsyncScriptPath,*connect_args) != True:
             print('rsync-error----->\033[42;1m\033[0m')
             dblog.error("[ERROR] rsync file to client error, Catch exception:, file: [ %s ], line: [ %s ]" % (
@@ -190,6 +198,14 @@ class ManageActionModelClass(BaseDbModelClass):
         else:
             return True
 
+    def runScript(self,ip,**r_dic):
+        username = r_dic['install_user']
+        sshport = r_dic['sshport']
+        password = r_dic['pass']
+        exec_dir = '{}/{}/{}'.format(self.remote_dir,self.app_name,'script/bin/')
+        cmd = 'cd {}&&chmod a+x *.sh&&./startapp.sh '.format(exec_dir)
+        pt = ParamikoTool()
+        pt.execCommand(ip,username,sshport,)
 
 
 

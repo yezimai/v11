@@ -42,7 +42,7 @@ class GetProjectModelClass(BaseDbModelClass):
             data = self._cursorQuery(sql, [id])
             print('<------>\033[32;1m%s\033[0m' %len(data))
             dblog.info('data is: %s, file: [ %s ], line: [ %s ]' % (data, __file__, sys._getframe().f_lineno))
-            if not len(data):
+            if len(data) == 0:
                 dblog.error('data is None , file: [ %s ], line: [ %s ]' % (__file__, sys._getframe().f_lineno))
                 return []
             for v in data:
