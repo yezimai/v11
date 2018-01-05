@@ -105,6 +105,7 @@ class ParamikoTool(object):
                 else:
                     stdread = stdout.read().decode('utf-8')
                     print "===== 输出信息 ：[ " + str(stdread) + " ] ======"
+                    return 'true'
             except Exception, e:
                 print "=========== 错误信息 3：" + str(e)
                 self.returnresult += 1
@@ -114,7 +115,7 @@ class ParamikoTool(object):
             print "=========== 错误信息 4：" + str(e)
             self.returnresult += 1
             return 'false'
-        return 'true'
+
 
 
 
@@ -326,6 +327,26 @@ class ParamikoTool(object):
         sf.close()
         return True
 
+    def getlogrow(self,ip,port,username,password,log_file):
+        """
+        获取远端服务器日志指定行述内容
+        :return:
+        """
+        try:
+            ssh = paramiko.SSHClient()
+            ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+            ssh.connect(ip,port,username,password)
+            command = 'tail -n 100 {1} '.format(log_file)
+            stdin, stdout, stderr = ssh.exec_command(command=command)
 
+            err = stderr.read().decode('gbk')
+            ssh.close()
+            if err != '':
+                return str(err)
+            else:
+                stdread = stdout.read().decode('gbk')
+                return stdread
+        except Exception, e:
+            return str(e)
 
 

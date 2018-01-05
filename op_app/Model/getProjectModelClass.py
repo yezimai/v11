@@ -172,9 +172,9 @@ class GetProjectModelClass(BaseDbModelClass):
 
         # for i in final_list:
         in_p = ', '.join((map(lambda x: '%s', final_list)))
-        sql = '''select p.id,p.name,p.code 
-                  from cmdb_project p  -- 项目表
-                  where p.code in (%s)'''
+        sql = '''select p.id, p.name, p.code, j.icon
+                  from cmdb_project p, op_app_nav j  -- 项目表
+                  where p.code=j.code and p.code in (%s)'''
         try:
             data = self._cursorQuery(sql %in_p,final_list)
             dblog.info(
@@ -184,7 +184,7 @@ class GetProjectModelClass(BaseDbModelClass):
                 e, __file__, sys._getframe().f_lineno))
             return []
         else:
-            if data is None :
+            if data is None:
                 dblog.error('data is None , file: [ %s ], line: [ %s ]' % (__file__, sys._getframe().f_lineno))
                 return []
             for j in data:
@@ -192,7 +192,7 @@ class GetProjectModelClass(BaseDbModelClass):
                 dic['id'] = j[0]
                 dic['text'] = j[1]
                 dic['code'] = j[2]
-                # if dic2 not in r_list:
+                dic['iconCls'] = j[3]
                 r_list_final.append(dic)
 
         return r_list_final

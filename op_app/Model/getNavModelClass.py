@@ -16,13 +16,17 @@ class GetNavModelClass(BaseDbModelClass):
     def getNavInfo(self):
         # 通过用户id,系统id来获取导航
         id = self.user.id
-
         for j in self.data:
             code = j['code']
             print '2222222',code
-            sql = '''select DISTINCT d.id,d.navname,d.url from auth_user a,op_app_group_user ab,op_app_group b,
-                                      op_app_group_permission bc,op_app_permission c,op_app_nav d ,
-                                      op_app_permission_nav cd
+            sql = '''select DISTINCT d.id, d.navname, d.url, d.icon
+                     from auth_user a,
+                          op_app_group_user ab,
+                          op_app_group b,
+                          op_app_group_permission bc,
+                          op_app_permission c,
+                          op_app_nav d,
+                          op_app_permission_nav cd
                       where a.id=%s and a.id=ab.user_id and ab.group_id=b.id and b.id=bc.group_id 
                             and bc.permission_id=c.id and c.id=cd.permission_id and cd.nav_id=d.id 
                             and d.pid = (select dd.id from op_app_nav dd where dd.code=%s)'''
@@ -39,13 +43,13 @@ class GetNavModelClass(BaseDbModelClass):
             else:
                 r_list = []
                 for i in range(len(res)):
-
                     dic = dict()
                     dic['id']=res[i][0]
                     dic['text'] = res[i][1]
                     dic['url'] = res[i][2]
+                    dic['iconCls'] = res[i][3]
                     r_list.append(dic)
-                    j['children']=r_list
+                    j['children'] = r_list
                 print('<------>\033[32;1m%s\033[0m' %r_list)
 
         # dblog.info("nav_data last: %s,file: [ %s ], line: [ %s ]" % (

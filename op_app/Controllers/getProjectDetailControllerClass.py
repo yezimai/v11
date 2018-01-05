@@ -14,7 +14,7 @@ class GetProjectDetailControllerClass(object):
         nav_id = self.request.GET.get('node_id')
         #print('nav_id----->',nav_id)
         #print '------>',user.username,type(user),type(user.username)
-        i_class = GetProjectDetailModelClass(nav_id,user_id)
+        i_class = GetProjectDetailModelClass(nav_id, user_id)
 
         data = i_class.getProjectInfo()
         return data

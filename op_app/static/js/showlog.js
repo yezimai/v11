@@ -15,7 +15,13 @@ $(function(){
         }
     }
 
-    var params = '?project_id='+ $('#project_id').val() +'&env_id=' + $('#env_id').val() + '&app_id=' + $('#app_id').val() + '&ip='+ $('#ip').val() + '&logdir_id='+ $('.select-log').val();
+    var params = '?project_id='+ $('#project_id').val() +
+                 '&env_id=' + $('#env_id').val() +
+                 '&app_id=' + $('#app_id').val() +
+                 '&ip='+ $('#ip').val() +
+                 '&logdir_id=' + $('.select-log').val() +
+                 '&server_type=' + $('#server_type').val() +
+                 '&server_id=' + $('#server_id').val();
 
     /* 表格内容获取 */
     $("#table2_demo4").dataTable({
@@ -25,17 +31,6 @@ $(function(){
         lengthMenu: [10, 20, 40], //每页显示选项
         pagingType: 'full_numbers',
         ajax : '/op/getLogInfo/' + params,
-//        ajax: {
-//            "url": '/op/getLogInfo/',
-//            "type": "POST",
-//            "data": {
-//                project_id : $('#project_id').val(),
-//                env_id : $('#env_id').val(),
-//                app_id : $('#app_id').val(),
-//                ip : $('#ip').val(),
-//                logdir_id: $('.select-log').val()
-//            },
-//        },
         ordering: true,
         columns : [
           {data:"no", orderable: true},
@@ -49,8 +44,8 @@ $(function(){
             orderable: false,
             render : function(data, type, row, meta){
                 btn_html = `
-                    <a target="_blank"  class="king-btn king-radius king-info click-btn" value="show" >查看</a>
-                    <a target="_blank"  class="king-btn king-radius king-warning click-btn" value="download" >下载</a>`
+                    <a target="_blank"  class="king-btn king-radius king-info click-btn show-btn" value="show" >查看</a>
+                    <a target="_blank"  class="king-btn king-radius king-warning click-btn download-btn" value="download" >下载</a>`
                 return btn_html;
             }
           }
@@ -58,12 +53,43 @@ $(function(){
         language:language
     });
 
+
+    var t = $("#table2_demo4").DataTable();  // 获取datatables对象
+    // 绑定查看事件按钮
+    $("#table2_demo4 tbody").on('click', 'a.show-btn', function(){
+        var row = t.row( $(this).parents('tr') ),  // 获取按钮所在的行
+          data = row.data();
+        var params_detail = '?project_id='+ $('#project_id').val() +
+                 '&env_id=' + $('#env_id').val() +
+                 '&app_id=' + $('#app_id').val() +
+                 '&ip='+ $('#ip').val() +
+                 '&logdir_id=' + $('.select-log').val() +
+                 '&server_type=' + $('#server_type').val() +
+                 '&server_id=' + $('#server_id').val() +
+                 '&file_name=' + data.file;
+        $(this).attr('href', '/op/getShowLogDetail/' + params_detail);
+    });
+
+    // 绑定下载事件按钮
+    $("#table2_demo4 tbody").on('click', 'a.download-btn', function(){
+        var row = t.row( $(this).parents('tr') ),  // 获取按钮所在的行
+          data = row.data();
+        alert('开发中。。。');
+    });
+
+
     /* 点击切换日志目录获取日志信息 */
     $('#ok').bind('click', function(e){
 
         // 重新获取表格数据
         var t = $("#table2_demo4").DataTable();
-        var params = '?project_id='+ $('#project_id').val() +'&env_id=' + $('#env_id').val() + '&app_id=' + $('#app_id').val() + '&ip='+ $('#ip').val() + '&logdir_id='+ $('.select-log').val();
+        var params = '?project_id='+ $('#project_id').val() +
+                        '&env_id=' + $('#env_id').val() +
+                        '&app_id=' + $('#app_id').val() +
+                        '&ip='+ $('#ip').val() +
+                        '&logdir_id='+ $('.select-log').val() +
+                        '&server_type=' + $('#server_type').val() +
+                        '&server_id=' + $('#server_id').val();
         var ajax_url ='/op/getLogInfo/';
         t.ajax.url(ajax_url + params).load();
     });
@@ -86,7 +112,10 @@ $(function(){
                 }, 2000);
                 return
             }else{
-                _this.attr('href', '/show/showlog/?id='+ id + '&dirname=' + dirname + '&logfilename='+logfilename + '&rownum='+rownum);
+                _this.attr('href', '/show/showlog/?id='+ id +
+                                    '&dirname=' + dirname +
+                                    '&logfilename='+ logfilename +
+                                    '&rownum=' + rownum);
             }
         });
 

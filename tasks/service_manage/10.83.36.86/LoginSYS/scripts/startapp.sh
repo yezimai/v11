@@ -46,15 +46,15 @@ main(){
         log_echo "[error]" "${func}" "Parameter error , ${PROGRAM_NAME} no use anyone parameter "
         return 1
     fi
-    check || return 1
     log_echo "[info] Enter ${func} with successed ." 
+
     # 检测当前执行用户非root
     detectionRootUser || return 1
     
     # 根据容器类型进行更新操作
     if [ ${apptype[1]} == "tomcat" ];then
         # 通过存储路径获取包名
-        #typeset appwarname=`stringToIntercept ${pkgfile}` || return 1
+        typeset appwarname=`stringToIntercept ${pkgfile}` || return 1
         log_echo "[info]" "To start the tomcat application"
         startTomcatApply ${appwarname} ${user[1]} ${appdir[1]} ${startuptime[1]} || return 1
     elif [ ${apptype[1]} == "weblogic" ];then
@@ -68,16 +68,6 @@ main(){
     return 0 
 }
 
-check(){
-    typeset func=main
-    log_echo "[info] Enter ${func} with successed ." 
-    mkdir -p ${LOG_DIR} ${TEMP_DIR}
-    if [ ! -f "${LOG_FILE}" ];then
-        > "${LOG_FILE}"
-    fi
-    log_echo "[info]" "Exit func ${func} with successed."
-    return 0
-}
 main $* || exit 1
 
 

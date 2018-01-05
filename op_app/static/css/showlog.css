@@ -1,0 +1,66 @@
+
+.clear {
+    clear:both;
+}
+
+/* 日志选择 */
+.div-showlog-main {
+    //background:#ddd !important;
+}
+.div-showlog-main .div-select {
+    margin: 20px 0 0 0;
+    //background:#ccc;
+    padding:15px 0 50px 20px !important;
+    height:42px;
+    line-height:42px;
+    //margin:auto 0 auto 20px ;
+    position:relative;
+}
+.div-showlog-main .div-select .title{
+    font-size:14px;
+}
+.div-showlog-main .div-select .select-log{
+    width:30%;
+    padding:5px;
+}
+.div-showlog-main .div-select .btn{
+    width:130px;
+    padding:10px;
+    position:absolute;
+    top:26%;
+    left:42%;
+}
+
+/* 项目应用主机信息 */
+.div-showlog-main .show-info{
+    margin:20px;
+    font-size:14px;
+    padding:10px 0 0px 20px;
+    border:1px solid #ccc;
+}
+.div-showlog-main .show-info .info-detail{
+
+}
+.div-showlog-main .show-info .info-detail .title{}
+.div-showlog-main .show-info .info-detail .content{}
+.div-showlog-main .show-info .info-detail .green{
+    color:green;
+}
+.div-showlog-main .show-info .info-detail .right{
+    float:right;
+    //padding-left:60%;
+    margin-right:70%;
+    margin-bottom:10px;
+}
+.div-showlog-main .show-info .info-detail .left{
+    float:left;
+}
+
+/* table 详细信息显示 */
+.detail-list {
+    margin: 20px;
+}
+
+
+
+

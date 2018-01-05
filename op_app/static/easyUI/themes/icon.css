@@ -68,104 +68,18 @@
 	background:url('icons/more.png') no-repeat center center;
 }
 
-.icon-beehive{
-	background:url('icons_new/beehive.png') no-repeat center center;
+
+.icon-project{
+	background:url('icons_new/project.png') no-repeat center center;
 }
-.icon-health_check{
-	background:url('icons_new/health_check.png') no-repeat center center;
+.icon-manage{
+	background:url('icons_new/manage.png') no-repeat center center;
 }
-.icon-network{
-	background:url('icons_new/network.png') no-repeat center center;
+.icon-release{
+	background:url('icons_new/release.png') no-repeat center center;
 }
-.icon-see_log{
-	background:url('icons_new/see_log.png') no-repeat center center;
-}
-.icon-see_network{
-	background:url('icons_new/see_network.png') no-repeat center center;
-}
-.icon-static_network{
-	background:url('icons_new/static_network.png') no-repeat center center;
-}
-.icon-domain_a{
-	background:url('icons_new/domain_a.png') no-repeat center center;
-}
-.icon-domain_b{
-	background:url('icons_new/domain_b.png') no-repeat center center;
-}
-.icon-loginSYS{
-	background:url('icons_new/loginSYS.png') no-repeat center center;
-}
-.icon-coreinterface{
-	background:url('icons_new/coreinterface.png') no-repeat center center;
-}
-.icon-datacenter{
-	background:url('icons_new/datacenter.png') no-repeat center center;
-}
-.icon-service_manage{
-	background:url('icons_new/service_manage.png') no-repeat center center;
-}
-.icon-system_set{
-	background:url('icons_new/system_set.png') no-repeat center center;
-}
-.icon-log_set_detail{
-	background:url('icons_new/log_set_detail.png') no-repeat center center;
-}
-.icon-base_info{
-	background:url('icons_new/base_info.png') no-repeat center center;
-}
-.icon-data-sync{
-	background:url('icons_new/data-sync.png') no-repeat center center;
-}
-.icon-module_check{
-	background:url('icons_new/module_check.png') no-repeat center center;
-}
-.icon-login_check{
-	background:url('icons_new/login_check.png') no-repeat center center;
-}
-.icon-check{
-	background:url('icons_new/check.png') no-repeat center center;
-}
-.icon-login{
-	background:url('icons_new/login.png') no-repeat center center;
-}
-.icon-password{
-	background:url('icons_new/password.png') no-repeat center center;
-}
-.icon-mobletel{
-	background:url('icons_new/mobletel.png') no-repeat center center;
-}
-.icon-fileupload{
-	background:url('icons_new/fileupload.png') no-repeat center center;
-}
-.icon-back{
-	background:url('icons_new/back.png') no-repeat center center;
-}
-.icon-front{
-	background:url('icons_new/front.png') no-repeat center center;
-}
-.icon-dubbo{
-	background:url('icons_new/dubbo.png') no-repeat center center;
-}
-.icon-common{
-	background:url('icons_new/common.png') no-repeat center center;
-}
-.icon-anyapi{
-	background:url('icons_new/anyapi.png') no-repeat center center;
-}
-.icon-pushmanager{
-	background:url('icons_new/pushmanager.png') no-repeat center center;
-}
-.icon-mqservice{
-	background:url('icons_new/mqservice.png') no-repeat center center;
-}
-.icon-start{
-	background:url('icons_new/start.png') no-repeat center center;
-}
-.icon-stop{
-	background:url('icons_new/stop.png') no-repeat center center;
-}
-.icon-download{
-	background:url('icons_new/download.png') no-repeat center center;
+.icon-statictis{
+	background:url('icons_new/statictis.png') no-repeat center center;
 }
 
 .icon-mini-add{

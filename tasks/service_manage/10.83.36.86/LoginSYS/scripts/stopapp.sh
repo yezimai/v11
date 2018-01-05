@@ -1,17 +1,15 @@
 #!/bin/bash
-
-. /etc/profile
-
-# Filename: startapp.sh
+# Filename: stopapp.sh
 # Revision: 1.1
 # Date: 2017/02/15
 # Email: sheng.huang@bqjr.cn
-# Usage: bash startapp.sh
-# 功能：启动容器中应用
+# Usage: bash stopapp.sh
+# 功能：停止应用程序 
 # 详细如下：
-#     判断容器类型，tomcat通过应用安装目录，启动应用。通过传入时间判断容器内
+#     通过用户名和应用安装位置获取到应用运行id号 直接kill，kill过程会列出详细信息
 #     脚本运行会检测是否已经过checkapp步骤，否则不会继续执行。
 # 返回值： 正常 0；  不正常 1
+
 
 # 脚本获取绝对路径，使不受运行位置影响
 if [ `echo "$0" |grep -c "/"` -gt 0 ];then
@@ -46,17 +44,16 @@ main(){
         log_echo "[error]" "${func}" "Parameter error , ${PROGRAM_NAME} no use anyone parameter "
         return 1
     fi
-    check || return 1
     log_echo "[info] Enter ${func} with successed ." 
+    log_echo "[info]" "Starting test program currently running the user"
+    
     # 检测当前执行用户非root
     detectionRootUser || return 1
-    
-    # 根据容器类型进行更新操作
+
+    # 根据容器类型进行操作
     if [ ${apptype[1]} == "tomcat" ];then
-        # 通过存储路径获取包名
-        #typeset appwarname=`stringToIntercept ${pkgfile}` || return 1
-        log_echo "[info]" "To start the tomcat application"
-        startTomcatApply ${appwarname} ${user[1]} ${appdir[1]} ${startuptime[1]} || return 1
+        log_echo "[info]" "To stop the tomcat application"
+        stopTomcatApply ${user[1]} ${appdir[1]} || return 1
     elif [ ${apptype[1]} == "weblogic" ];then
         log_echo "[info]" "Weblogic container, temporarily does not support automatic exit"  
     else
@@ -64,20 +61,9 @@ main(){
     fi
     
     log_echo "[info]" "Exit func ${func} with successed."
-    log_echo "[info]" "启动应用成功 || Start the application successfully "
+    log_echo "[info]" "停止应用成功或未发现java进程 || Stop the application successful or not find Java process "
     return 0 
 }
 
-check(){
-    typeset func=main
-    log_echo "[info] Enter ${func} with successed ." 
-    mkdir -p ${LOG_DIR} ${TEMP_DIR}
-    if [ ! -f "${LOG_FILE}" ];then
-        > "${LOG_FILE}"
-    fi
-    log_echo "[info]" "Exit func ${func} with successed."
-    return 0
-}
 main $* || exit 1
-
 

@@ -44,10 +44,8 @@ main(){
         log_echo "[error]" "${func}" "Parameter error , ${PROGRAM_NAME} no use anyone parameter "
         return 1
     fi
-    log_echo "[info] Enter ${func} with successed ." 
-    
     check || return 1
-    
+    log_echo "[info] Enter ${func} with successed ." 
     log_echo "[info]" "Starting test program currently running the user"
     
     # 检测当前执行用户非root
