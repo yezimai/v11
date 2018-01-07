@@ -32,6 +32,9 @@ class ManageActionModelClass(BaseDbModelClass):
             dblog.error("[ERROR] --wrong action args from web-----, Catch exception:, file: [ %s ], line: [ %s ]"
                         %(__file__,sys._getframe().f_lineno))
             return False
+        res = pub.AppConfigDetail.AppConfigDetail(self.server_type, self.app_id, self.server_id,\
+                                                  self.env_id, self.project_id)
+
         # # 根据项目、环境、应用、ip对对应的部署在此机器上的应用信息
         # if self.server_type == '2':
         #     sql = '''
@@ -77,7 +80,7 @@ class ManageActionModelClass(BaseDbModelClass):
         #     # print('*****wrong action args....')
         #     dblog.error("[ERROR]--invalid-action args-----, Catch exception:, file: [ %s ], line: [ %s ]"
         #                 %(__file__,sys._getframe().f_lineno))
-        res = self.AppConfigDetail(self.server_type,)
+        #res = self.AppConfigDetail(self.server_type,)
         if not res:
             runlog.error("the APP Data is null, file: [ %s ], line: [ %s ]" % (
                             __file__, sys._getframe().f_lineno))
