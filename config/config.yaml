@@ -9,6 +9,14 @@ db:
   PORT: 3306
 
 
+- name: op_db
+  ENGINE: django.db.backends.mysql
+  DB_NAME: operation_db
+  USER: root
+  PASSWORD: bqjrcmdb
+  HOST: 10.83.36.87
+  PORT: 3306
+
 
 
 other:

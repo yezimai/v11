@@ -15,7 +15,7 @@ class LogDetailControllerClass(object):
         #print '------>',user.username,type(user),type(user.username)
         i_class = LogDetailModelClass(self.request)
         return i_class.logDetail()
-        import json
+        #import json
         #runlog.info('getProjectInfo data: %s' % (json.dumps(data, indent=4)))
         # return data
 

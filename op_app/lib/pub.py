@@ -11,6 +11,7 @@ import time
 import datetime
 import commands
 from op_app.logger.log import dblog, runlog
+from op_app.Model.base.baseModelClass import BaseDbModelClass
 # from ...config.config import *
 # import ansible.runner
 import json
@@ -80,54 +81,59 @@ def rsyncServerToClients(local_sync_script, *lst):
     print "===========  传输脚本到远程结束 =================="
     return True
 #####构建sql获取APP应用的信息#######
-def AppConfigDetail(self):  # 查找app的
-    # 根据项目、环境、应用、ip对对应的部署在此机器上的应用信息
-    if server_type == '2':
-        sql = '''
+class appConfigDetail(BaseDbModelClass):
+    def __init__(self):
+        super(appConfigDetail,self).__init__()
+
+
+    def AppConfigDetail(self,server_type,app_id, server_id, env_id, project_id):  # 查找app的
+        # 根据项目、环境、应用、ip对对应的部署在此机器上的应用信息
+        if server_type == '2':
+            sql = '''
+                select p.code,de.install_user,
+                        e.type_app,de.app_dir,
+                        de.pkgname,de.server_port,e.name,
+                        de.install_pass,de.ssh_port
+                from cmdb_server_app de, -- 服务器-app中间表	
+                      cmdb_env_server hd, 	-- 服务器-环境中间表
+                      cmdb_env h,					-- 环境表
+                      cmdb_project p,		  -- 项目表	
+                      cmdb_app e					-- app表
+                where de.app_id = %s and de.app_id=e.id and de.virtual_server_id = %s 
+                      and hd.virtual_server_id=de.virtual_server_id 
+                      and h.env_type=%s and h.id=hd.env_id and p.id=%s 
+            '''
+        elif server_type == '1':
+            sql = '''
             select p.code,de.install_user,
                     e.type_app,de.app_dir,
                     de.pkgname,de.server_port,e.name,
                     de.install_pass,de.ssh_port
-            from cmdb_server_app de, -- 服务器-app中间表	
-                  cmdb_env_server hd, 	-- 服务器-环境中间表
-                  cmdb_env h,					-- 环境表
-                  cmdb_project p,		  -- 项目表	
-                  cmdb_app e					-- app表
-            where de.app_id = %s and de.app_id=e.id and de.virtual_server_id = %s 
-                  and hd.virtual_server_id=de.virtual_server_id 
-                  and h.env_type=%s and h.id=hd.env_id and p.id=%s 
-        '''
-    elif server_type == '1':
-        sql = '''
-        select p.code,de.install_user,
-                e.type_app,de.app_dir,
-                de.pkgname,de.server_port,e.name,
-                de.install_pass,de.ssh_port
-            from cmdb_server_app de,    -- 服务器-app中间表
-                  cmdb_env_server hd, 	-- 服务器-环境中间表
-                  cmdb_env h,					-- 环境表
-                  cmdb_project p,		  -- 项目表	
-                  cmdb_app e					-- app表
-            where de.app_id = %s and de.app_id=e.id and de.physical_server_id = %s 
-                  and hd.physical_server_id=de.physical_server_id 
-                  and h.env_type=%s and h.id=hd.env_id and p.id=%s 
-        '''
-    else:
-        # print('--wrong-server_type---->\033[42;1m\033[0m')
-        runlog.error("[ERROR] --invalid-server_type-----, Catch exception:, file: [ %s ], line: [ %s ]"
-                    %(__file__,sys._getframe().f_lineno))
-    try:
-        res = self._cursorQuery(sql, [self.app_id, self.server_id, self.env_id, self.project_id])
-    except Exception as e:
-        dblog.error("[ERROR] Query error, Catch exception:[ %s ], file: [ %s ], line: [ %s ],sql:[%s]" % (
-            e, __file__, sys._getframe().f_lineno, sql))
-        return False
-    if len(res) == 0:
-        # print('*****wrong action args....')
-        dblog.error("[ERROR]--invalid-action args-----, Catch exception:, file: [ %s ], line: [ %s ]"
-                    %(__file__,sys._getframe().f_lineno))
-        return False
-    return res
+                from cmdb_server_app de,    -- 服务器-app中间表
+                      cmdb_env_server hd, 	-- 服务器-环境中间表
+                      cmdb_env h,					-- 环境表
+                      cmdb_project p,		  -- 项目表	
+                      cmdb_app e					-- app表
+                where de.app_id = %s and de.app_id=e.id and de.physical_server_id = %s 
+                      and hd.physical_server_id=de.physical_server_id 
+                      and h.env_type=%s and h.id=hd.env_id and p.id=%s 
+            '''
+        else:
+            # print('--wrong-server_type---->\033[42;1m\033[0m')
+            runlog.error("[ERROR] --invalid-server_type-----, Catch exception:, file: [ %s ], line: [ %s ]"
+                        %(__file__,sys._getframe().f_lineno))
+        try:
+            res = self._cursorQuery(sql, [app_id, server_id, env_id, project_id])
+        except Exception as e:
+            dblog.error("[ERROR] Query error, Catch exception:[ %s ], file: [ %s ], line: [ %s ],sql:[%s]" % (
+                e, __file__, sys._getframe().f_lineno, sql))
+            return False
+        if len(res) == 0:
+            # print('*****wrong action args....')
+            dblog.error("[ERROR]--invalid-action args-----, Catch exception:, file: [ %s ], line: [ %s ]"
+                        %(__file__,sys._getframe().f_lineno))
+            return False
+        return res
 
 
 ##########  执行 shell command  ####

@@ -332,21 +332,36 @@ class ParamikoTool(object):
         获取远端服务器日志指定行述内容
         :return:
         """
+        remote_tmp_file = '/tmp/1.log'
         try:
             ssh = paramiko.SSHClient()
             ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-            ssh.connect(ip,port,username,password)
-            command = 'tail -n 100 {1} '.format(log_file)
+            ssh.connect(ip, port, username, password)
+            command = 'tail -n 100 {}'.format(log_file)
             stdin, stdout, stderr = ssh.exec_command(command=command)
 
             err = stderr.read().decode('gbk')
             ssh.close()
+            data = stdout.read()
+            # data = stdout.readlines()
             if err != '':
-                return str(err)
-            else:
-                stdread = stdout.read().decode('gbk')
-                return stdread
+                runlog.info("the logfile is %s,ple wait, file: [ %s ], line: [ %s ]" % (err,
+                    __file__, sys._getframe().f_lineno))
+
+                return 'it takes sometime,please refresh it!!!'
+            try:
+                ret_data = data.decode('utf-8')
+            except:
+                try:
+                    ret_data = data.decode('gbk')
+                except:
+                    command = 'tail -n 100 {0} > {1};cat -v {1}'.format(log_file, remote_tmp_file)
+                    stdin, stdout, stderr = ssh.exec_command(command=command)
+                    ret_data = stdout.read()
+            return ret_data
+
         except Exception, e:
+            # print('9999', e)
             return str(e)
 
 

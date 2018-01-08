@@ -75,7 +75,7 @@ def getNav(request):
     # 获取用户有权限的项目
     i_pro_class = getProjectNavControllerClass.GetProjectNavControllerClass(request)
     data = i_pro_class.getProject()
-    #获取导航
+    # 获取导航
     i_nav_class = getNavControllerClass.GetNavControllerClass(request, data)
     data = i_nav_class.getNav()
 
@@ -292,10 +292,8 @@ def doServiceManageAction(request):
            2.3 远程调用 10.0.0.3 机器下  ${HOME}/service_manage/bin/startapp.sh 或者 stopapp.sh, 成功返回成功，失败返回失败
 
     '''
-    import time
     i_class = serviceManageActionControllerClass.ManageActionControllerClass(request)
     res = i_class.getAction()
-    time.sleep(5)
     return JsonResponse(res, safe=False)
 
 

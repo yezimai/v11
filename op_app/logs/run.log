@@ -3002,3 +3002,20 @@
         "id": 64
     }
 ]
+2018-01-08 13:49:23 - dblog - INFO - Enter getProjectInfo successed,file: [ E:\workshop\platform\v1\op_app\Model\getProjectModelClass.py ], line: [ 23 ]
+2018-01-08 13:49:23 - dblog - INFO - data is: ((2L, 12L, None), (2L, 13L, None), (2L, 14L, None), (2L, 15L, None)), file: [ E:\workshop\platform\v1\op_app\Model\getProjectModelClass.py ], line: [ 44 ]
+2018-01-08 13:49:23 - dblog - INFO - data2 is: ((u'HCS',), (u'HCS',), (u'HCS',), (u'HCS',), (u'HCS',), (u'HCS',), (u'HCS',), (u'HCS',)), file: [ E:\workshop\platform\v1\op_app\Model\getProjectModelClass.py ], line: [ 69 ]
+2018-01-08 13:49:23 - dblog - INFO - data2 is: ((u'HCS',), (u'HCS',), (u'HCS',), (u'HCS',), (u'HCS',), (u'HCS',), (u'HCS',), (u'HCS',)), file: [ E:\workshop\platform\v1\op_app\Model\getProjectModelClass.py ], line: [ 69 ]
+2018-01-08 13:49:23 - dblog - INFO - data2 is: ((u'HCS',), (u'HCS',), (u'HCS',), (u'HCS',), (u'HCS',), (u'HCS',), (u'HCS',), (u'HCS',)), file: [ E:\workshop\platform\v1\op_app\Model\getProjectModelClass.py ], line: [ 69 ]
+2018-01-08 13:49:23 - dblog - INFO - data2 is: ((u'HCS',), (u'HCS',), (u'HCS',), (u'HCS',), (u'HCS',), (u'HCS',), (u'HCS',), (u'HCS',)), file: [ E:\workshop\platform\v1\op_app\Model\getProjectModelClass.py ], line: [ 69 ]
+2018-01-08 13:49:23 - dblog - INFO - datajiaoji is: ((64L, u'\u8702\u5de2\u63d0\u5355\u7cfb\u7edf', u'HCS', u'icon-project'),), file: [ E:\workshop\platform\v1\op_app\Model\getProjectModelClass.py ], line: [ 181 ]
+2018-01-08 13:49:23 - runlog - INFO - getProjectInfo data: [
+    {
+        "text": "\u8702\u5de2\u63d0\u5355\u7cfb\u7edf", 
+        "iconCls": "icon-project", 
+        "code": "HCS", 
+        "id": 64
+    }
+]
+2018-01-08 13:49:36 - dblog - ERROR - Unexected error: [ [Errno 2] No such file or directory: 'E:\\workshop\\platform\\v1\\op_app\\Model/../../tasks/service_manage/10.83.36.86/LoginSYS/scripts/bin/pub.lib' ], file: [ E:\workshop\platform\v1\op_app\Model\serviceManageActionModelClass.py ], line: [ 169 ]
+2018-01-08 13:49:36 - dblog - ERROR - [ERROR] --configFile-create-failed------, Catch exception:, file: [ E:\workshop\platform\v1\op_app\Model\serviceManageActionModelClass.py ], line: [ 135 ]

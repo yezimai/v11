@@ -44,6 +44,7 @@ $(function(){
             orderable: false,
             render : function(data, type, row, meta){
                 btn_html = `
+                    <span>文件尾</span><input class="" type="text" value="" style="width:60px;margin:0 2px 0 2px;" ><span>行</span>
                     <a target="_blank"  class="king-btn king-radius king-info click-btn show-btn" value="show" >查看</a>
                     <a target="_blank"  class="king-btn king-radius king-warning click-btn download-btn" value="download" >下载</a>`
                 return btn_html;
@@ -74,7 +75,7 @@ $(function(){
     $("#table2_demo4 tbody").on('click', 'a.download-btn', function(){
         var row = t.row( $(this).parents('tr') ),  // 获取按钮所在的行
           data = row.data();
-        alert('开发中。。。');
+        $(this).attr('href', '/static/tmp.tar');
     });
 
 
