@@ -3,17 +3,91 @@
 <head>
     <meta charset="UTF-8">
     <title>运维平台-管理-配置文件更改</title>
-
     <link rel="icon" href="{% static 'img/configuration.png' %}" type="image/x-icon">
-    <link rel="stylesheet" href="{% static 'static/assets/bk/css/bk.css' %}">
 
+    <link rel="stylesheet" href="https://magicbox.bkclouds.cc/static_api/v3/assets/jstree-3.1.1/dist/themes/default/style.min.css" />
+
+    <link href="https://magicbox.bkclouds.cc/static_api/v3/bk/css/base/common.css" rel="stylesheet">
+    <link href="https://magicbox.bkclouds.cc/static_api/v3/bk/css/components/button.css" rel="stylesheet">
+    <link href="https://magicbox.bkclouds.cc/static_api/v3/assets/fontawesome/css/font-awesome.min.css" rel="stylesheet">
+    <link href="{% static 'static/assets/artDialog-6.0.4/css/ui-dialog.css' %}" rel="stylesheet">
+    <link href="{% static 'static/assets/toastr-2.1.2/toastr.min.css' %}" rel="stylesheet">
+
+
+
+    <style type="text/css">
+        .clear{
+            clear:both;
+        }
+        #main{
+            background:#eee;
+            min-height:800px;
+            width:400px;
+            margin:20px 0 0 15px;
+            padding:15px;
+            float:left;
+        }
+        #content{
+            //background:#ccc;
+            float:right;
+            width:65%;
+            min-height:1000px;
+            margin:20px 10px 0 0;
+        }
+        #content .file-div{
+            float:left;
+            margin-top:10px;
+        }
+        #content .btns{
+            float:right;
+            padding: 10px;
+        }
+        #content .config-content{
+            background:#eee;
+            width:100%;
+            min-height:1000px;
+        }
+        #content .config-content.edit{
+            background:#fff;
+        }
+    </style>
 </head>
+
 <body>
 
-    <div class="king-exception-box king-403-page">
-        <img src="https://magicbox.bk.tencent.com/static_api/v3/components/exception_building/images/building.png">
-        <h1>配置文件页面 正在建设中...</h1>
-        <!--<a href="javascript:;" class="king-btn king-info">立即跳转</a>-->
+    <input id="project_id" type="hidden" value="{{ data.project_id }}">
+    <input id="env_id" type="hidden" value="{{ data.env_id }}">
+    <input id="app_id" type="hidden" value="{{ data.app_id }}">
+    <input id="ip" type="hidden" value="{{ data.ip }}">
+    <input id="server_type" type="hidden" value="{{ data.server_type }}">
+    <input id="server_id" type="hidden" value="{{ data.server_id }}">
+
+<div id="main">
+    <input name="base_path" type="hidden" value="{{data.remote_dir}}">
+    <div id="plugin11_demo7" class="demo"></div>
+</div>
+
+<div id="content">
+    <div class="file-div" style="display:none;">
+        <input type="file" name="file_upload" id="file_upload" />
+        <button id="click_upload" type="button" class="king-btn-demo king-btn king-radius king-info" >开始上传附件</button>
     </div>
+    <div class="btns">
+        <button id="edit" class="king-btn-demo king-btn king-radius king-info" title="编辑">编辑</button>
+        <button id="save" class="king-btn-demo king-btn king-radius king-success" title="保存">保存</button>
+        <button id="cancel" class="king-btn-demo king-btn king-radius king-danger" title="取消">取消</button>
+    </div>
+    <textarea id="textarea_content" class="config-content" spellcheck="false" readOnly="true" ></textarea>
+</div>
+<div class="clear"></div>
+
 </body>
+    <script src="{% static 'static/assets/js/jquery-1.10.2.min.js' %}"></script>
+    <script src="{% static 'static/assets/jstree-3.1.1/dist/jstree.min.js' %}"></script>
+    <script src="{% static 'static/assets/toastr-2.1.2/toastr.min.js' %}"></script>
+    <script src="{% static 'static/assets/artDialog-6.0.4/dist/dialog-min.js' %}"></script>
+    <script src="http://malsup.github.io/jquery.form.js"></script>
+
+    <script src="{% static 'js/configuration.js' %}"></script>
+
 </html>

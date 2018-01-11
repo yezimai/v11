@@ -1,6 +1,7 @@
 #!/usr/bin/python
 # -*- coding: UTF-8 -*-
 
+
 import logging
 import os,sys
 import subprocess
@@ -11,7 +12,7 @@ import time
 import datetime
 import commands
 from op_app.logger.log import dblog, runlog
-from op_app.Model.base.baseModelClass import BaseDbModelClass
+from op_app.Model.permissionModelClass import PermissionModelClass
 # from ...config.config import *
 # import ansible.runner
 import json
@@ -80,62 +81,6 @@ def rsyncServerToClients(local_sync_script, *lst):
         return False
     print "===========  传输脚本到远程结束 =================="
     return True
-#####构建sql获取APP应用的信息#######
-class appConfigDetail(BaseDbModelClass):
-    def __init__(self):
-        super(appConfigDetail,self).__init__()
-
-
-    def AppConfigDetail(self,server_type,app_id, server_id, env_id, project_id):  # 查找app的
-        # 根据项目、环境、应用、ip对对应的部署在此机器上的应用信息
-        if server_type == '2':
-            sql = '''
-                select p.code,de.install_user,
-                        e.type_app,de.app_dir,
-                        de.pkgname,de.server_port,e.name,
-                        de.install_pass,de.ssh_port
-                from cmdb_server_app de, -- 服务器-app中间表	
-                      cmdb_env_server hd, 	-- 服务器-环境中间表
-                      cmdb_env h,					-- 环境表
-                      cmdb_project p,		  -- 项目表	
-                      cmdb_app e					-- app表
-                where de.app_id = %s and de.app_id=e.id and de.virtual_server_id = %s 
-                      and hd.virtual_server_id=de.virtual_server_id 
-                      and h.env_type=%s and h.id=hd.env_id and p.id=%s 
-            '''
-        elif server_type == '1':
-            sql = '''
-            select p.code,de.install_user,
-                    e.type_app,de.app_dir,
-                    de.pkgname,de.server_port,e.name,
-                    de.install_pass,de.ssh_port
-                from cmdb_server_app de,    -- 服务器-app中间表
-                      cmdb_env_server hd, 	-- 服务器-环境中间表
-                      cmdb_env h,					-- 环境表
-                      cmdb_project p,		  -- 项目表	
-                      cmdb_app e					-- app表
-                where de.app_id = %s and de.app_id=e.id and de.physical_server_id = %s 
-                      and hd.physical_server_id=de.physical_server_id 
-                      and h.env_type=%s and h.id=hd.env_id and p.id=%s 
-            '''
-        else:
-            # print('--wrong-server_type---->\033[42;1m\033[0m')
-            runlog.error("[ERROR] --invalid-server_type-----, Catch exception:, file: [ %s ], line: [ %s ]"
-                        %(__file__,sys._getframe().f_lineno))
-        try:
-            res = self._cursorQuery(sql, [app_id, server_id, env_id, project_id])
-        except Exception as e:
-            dblog.error("[ERROR] Query error, Catch exception:[ %s ], file: [ %s ], line: [ %s ],sql:[%s]" % (
-                e, __file__, sys._getframe().f_lineno, sql))
-            return False
-        if len(res) == 0:
-            # print('*****wrong action args....')
-            dblog.error("[ERROR]--invalid-action args-----, Catch exception:, file: [ %s ], line: [ %s ]"
-                        %(__file__,sys._getframe().f_lineno))
-            return False
-        return res
-
-
 ##########  执行 shell command  ####
 def execShellCommand(*lst):
     # print "execShellCommand list:", lst
@@ -151,6 +96,40 @@ def execShellCommand(*lst):
             print 'Run command error:[ ' + str(cmd_list) + ' ]'
             return False
     return True
+
+#### 传输脚本到远程 函数 ### 第二个参数为： [ip,user,port,password,local_dir,remote_dir]
+def rsyncRemoteFileToLocal(local_sync_script, *lst):
+    # for i in range(len(list)):
+    all_cmd_list = [] # 需要每次循环后清空
+    ip = '{0}'.format(lst[0])
+    user = '{0}'.format(lst[1])
+    port = '{0}'.format(lst[2])
+    password = '{0}'.format(lst[3])
+    remote_dir_file = '{0}'.format(lst[4])
+    local_dir = '{0}'.format(lst[5])
+    isFromLocal = 'NO'
+
+    sync_data_cmd = [local_sync_script, ip, user, port, "'"+password+"'", remote_dir_file, local_dir, isFromLocal]
+    all_cmd_list.append(sync_data_cmd)
+    print "all_cmd_list:", all_cmd_list
+    if(execShellCommand(*all_cmd_list) != True):
+        print "=========== [ERROR] 传输脚本到本地失败 =================="
+        return False
+    print "=========== [INFO] 传输脚本到本地结束 =================="
+    return True
+
+def hasAccessPermission(uid, type, server_id):
+    args = [int(type), int(server_id)]
+    i_class = PermissionModelClass(uid)
+    user_permission_list = i_class.getAccessServerInfo()
+    print('2222--sql access logdetail ',user_permission_list)
+    print('2222--web access logdetail args',args)
+    if args in user_permission_list:
+        return True
+    else:
+        return False
+
+
 
 #### 将列表值以行的形式写入到文件中 list=[['a=3', 'a'],['b=4', 'a']]#######
 def writeListItemsToFile(*list):

@@ -47,24 +47,15 @@ class PermissionModelClass(DefaultDbModelClass):
                         % (__file__, sys._getframe().f_lineno))
                 return ret_lst
             for e_data in data:
-                print('server_type:', e_data[0])
-                print('physical_server_id:', e_data[1])
-                print('virtual_server_id:', e_data[2])
+                # print('server_type:', e_data[0])
+                # print('physical_server_id:', e_data[1])
+                # print('virtual_server_id:', e_data[2])
                 if e_data[1] is None:
-                    ret_lst.append((int(e_data[0]), int(e_data[2])))
+                    ret_lst.append([int(e_data[0]), int(e_data[2])])
                 else:
-                    ret_lst.append((int(e_data[0]), int(e_data[1])))
+                    ret_lst.append([int(e_data[0]), int(e_data[1])])
             return ret_lst
 
-
-    def hasAccessPermission(self,*args):
-        user_permission_list = self.getAccessServerInfo()
-        print('2222--sql access logdetail ',user_permission_list)
-        print('2222--web access logdetail args',args)
-        if args in user_permission_list:
-            return True
-        else:
-            return False
 
 
 

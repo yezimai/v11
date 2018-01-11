@@ -1,5 +1,28 @@
 $(function(){
 
+    var waitDialog = dialog({   // 加载对话框
+        width: 200,
+        content: '<img class="mr5" src="https://magicbox.bkclouds.cc/static_api/v3/components/loading1/images/loading_2_16x16.gif">请稍后，加载中...'
+    });
+
+    function success(data){     // 提交成功提示信息
+        var animation = $(this).attr('data-animation');
+        toastr.remove();
+        toastr.success('<br>'+ data,'提示',{
+            timeOut:1000,
+            showMethod :animation
+        });
+    }
+
+    function error(data){          //  错误时候提示信息
+        var animation = $(this).attr('data-animation');
+        toastr.remove();
+        toastr.error('<br>'+ data,'提示',{
+            timeOut:1500,
+            showMethod :animation
+        });
+    }
+
     var language = {
         search: '搜索：',
         lengthMenu: "每页显示 _MENU_ 记录",
@@ -44,7 +67,7 @@ $(function(){
             orderable: false,
             render : function(data, type, row, meta){
                 btn_html = `
-                    <span>文件尾</span><input class="" type="text" value="" style="width:60px;margin:0 2px 0 2px;" ><span>行</span>
+                    <span>文件尾</span><input class="input-num" type="text" value="200" style="width:60px;margin:0 2px 0 2px;" ><span>行</span>
                     <a target="_blank"  class="king-btn king-radius king-info click-btn show-btn" value="show" >查看</a>
                     <a target="_blank"  class="king-btn king-radius king-warning click-btn download-btn" value="download" >下载</a>`
                 return btn_html;
@@ -67,7 +90,9 @@ $(function(){
                  '&logdir_id=' + $('.select-log').val() +
                  '&server_type=' + $('#server_type').val() +
                  '&server_id=' + $('#server_id').val() +
-                 '&file_name=' + data.file;
+                 '&file_name=' + data.file +
+                 '&action=' + 'log_show' +
+                 '&line_num=' + $(this).parent().find('.input-num').val();
         $(this).attr('href', '/op/getShowLogDetail/' + params_detail);
     });
 
@@ -75,7 +100,35 @@ $(function(){
     $("#table2_demo4 tbody").on('click', 'a.download-btn', function(){
         var row = t.row( $(this).parents('tr') ),  // 获取按钮所在的行
           data = row.data();
-        $(this).attr('href', '/static/tmp.tar');
+//        $(this).attr('href', '/op/download_log/');
+        $.ajax({                             // 提交数据表单
+            type:'GET',
+            url : '/op/downloadlog/',
+            data : {
+                project_id: $('#project_id').val(),
+                env_id: $('#env_id').val(),
+                app_id: $('#app_id').val(),
+                ip: $('#ip').val(),
+                logdir_id: $('.select-log').val(),
+                server_type: $('#server_type').val(),
+                server_id: $('#server_id').val(),
+                file_name: data.file,
+                action: 'downloadlog'
+            },
+            beforeSend:function(jqXR, settings){
+                waitDialog.show();
+            },
+            success:function(data){
+                waitDialog.close();
+                console.log(data);
+                window.open(data);
+            },
+            error : function(XMLHttpRequest, textStatus, errorThrown) {
+                waitDialog.close();
+                error('获取日志文件失败！，错误信息:' + errorThrown);
+            },
+        });
+
     });
 
 
@@ -95,64 +148,64 @@ $(function(){
         t.ajax.url(ajax_url + params).load();
     });
 
-    function loaddatasuccess(){
-        $('a[name="show"]').bind('click', function(e){             // 查看日志
-            var _this = $(this);
-            var id = $('#id').val();
-            var dirname = $.trim($('.select-log').find('option:selected').text());
-            var logfilename = $.trim(_this.parent().parent().find('.filename').text());
-            var rownum = _this.parent().find('input[name="line"]').val();
-            if (!(/(^[1-9]\d*$)/.test(rownum))){
-                _this.parent().find('input[name="line"]').css({
-                    'border': '2px solid red',
-                });
-                setTimeout(function(){
-                    _this.parent().find('input[name="line"]').css({
-                        'border': '1px solid #ccc',
-                    });
-                }, 2000);
-                return
-            }else{
-                _this.attr('href', '/show/showlog/?id='+ id +
-                                    '&dirname=' + dirname +
-                                    '&logfilename='+ logfilename +
-                                    '&rownum=' + rownum);
-            }
-        });
+//    function loaddatasuccess(){
+//        $('a[name="show"]').bind('click', function(e){             // 查看日志
+//            var _this = $(this);
+//            var id = $('#id').val();
+//            var dirname = $.trim($('.select-log').find('option:selected').text());
+//            var logfilename = $.trim(_this.parent().parent().find('.filename').text());
+//            var rownum = _this.parent().find('input[name="line"]').val();
+//            if (!(/(^[1-9]\d*$)/.test(rownum))){
+//                _this.parent().find('input[name="line"]').css({
+//                    'border': '2px solid red',
+//                });
+//                setTimeout(function(){
+//                    _this.parent().find('input[name="line"]').css({
+//                        'border': '1px solid #ccc',
+//                    });
+//                }, 2000);
+//                return
+//            }else{
+//                _this.attr('href', '/show/showlog/?id='+ id +
+//                                    '&dirname=' + dirname +
+//                                    '&logfilename='+ logfilename +
+//                                    '&rownum=' + rownum);
+//            }
+//        });
 
         /* 下载点击 */
-        $('a[name="download"]').bind('click', function(e){
-            var _this = $(this)
-            var id = $('#id').val();
-            var dirname = $.trim($('.select-log').find('option:selected').text());
-            var logfilename = $.trim(_this.parent().parent().find('.filename').text());
-            //_this.attr('href', '/show/showlog/?id='+ id + '&dirname=' + dirname + '&logfilename='+logfilename + '&rownum='+rownum);
-            $.ajax({                             // 提交数据表单
-                type:'GET',
-                url : '/show/downloadlog/',
-                data : {
-                    id : id,
-                    dirname : dirname,
-                    logfilename : logfilename
-                },
-                beforeSend:function(jqXR, settings){
-                    $.messager.progress();
-                },
-                success:function(data){
-                    $.messager.progress('close');
-                    console.log(data);
-                    window.open(data);
-                },
-                error : function(XMLHttpRequest, textStatus, errorThrown) {
-                    $.messager.progress('close');
-                    $.messager.show({
-                        title:'提示',
-                        msg:'获取日志文件失败！，错误信息：' + errorThrown,
-                        showType: 'slide',
-                        timeout: 3000
-                    });
-                },
-            });
-        });
-    }
+//        $('a[name="download"]').bind('click', function(e){
+//            var _this = $(this)
+//            var id = $('#id').val();
+//            var dirname = $.trim($('.select-log').find('option:selected').text());
+//            var logfilename = $.trim(_this.parent().parent().find('.filename').text());
+//            //_this.attr('href', '/show/showlog/?id='+ id + '&dirname=' + dirname + '&logfilename='+logfilename + '&rownum='+rownum);
+//            $.ajax({                             // 提交数据表单
+//                type:'GET',
+//                url : '/show/downloadlog/',
+//                data : {
+//                    id : id,
+//                    dirname : dirname,
+//                    logfilename : logfilename
+//                },
+//                beforeSend:function(jqXR, settings){
+//                    $.messager.progress();
+//                },
+//                success:function(data){
+//                    $.messager.progress('close');
+//                    console.log(data);
+//                    window.open(data);
+//                },
+//                error : function(XMLHttpRequest, textStatus, errorThrown) {
+//                    $.messager.progress('close');
+//                    $.messager.show({
+//                        title:'提示',
+//                        msg:'获取日志文件失败！，错误信息：' + errorThrown,
+//                        showType: 'slide',
+//                        timeout: 3000
+//                    });
+//                },
+//            });
+//        });
+//    }
 });

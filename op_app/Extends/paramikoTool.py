@@ -10,7 +10,6 @@ import threading
 from stat import S_ISDIR
 from ..lib.pub import *
 
-
 class ParamikoTool(object):
 
     # 构造函数
@@ -140,7 +139,7 @@ class ParamikoTool(object):
                 try:
                     if err != '':
                         print "=========== 错误信息 1：" + str(err).decode('utf-8')
-                        self.returnresult+=1
+                        self.returnresult += 1
                         return 'false'
                     else:
                         stdread = stdout.read().decode('utf-8')
@@ -327,7 +326,7 @@ class ParamikoTool(object):
         sf.close()
         return True
 
-    def getlogrow(self,ip,port,username,password,log_file):
+    def getlogrow(self, ip,port, username, password, log_file, line_num):
         """
         获取远端服务器日志指定行述内容
         :return:
@@ -337,7 +336,7 @@ class ParamikoTool(object):
             ssh = paramiko.SSHClient()
             ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
             ssh.connect(ip, port, username, password)
-            command = 'tail -n 100 {}'.format(log_file)
+            command = 'tail -n {} {}'.format(line_num, log_file)
             stdin, stdout, stderr = ssh.exec_command(command=command)
 
             err = stderr.read().decode('gbk')
@@ -345,7 +344,7 @@ class ParamikoTool(object):
             data = stdout.read()
             # data = stdout.readlines()
             if err != '':
-                runlog.info("the logfile is %s,ple wait, file: [ %s ], line: [ %s ]" % (err,
+                runlog.error("the logfile is %s,ple wait, file: [ %s ], line: [ %s ]" % (err,
                     __file__, sys._getframe().f_lineno))
 
                 return 'it takes sometime,please refresh it!!!'
@@ -355,7 +354,7 @@ class ParamikoTool(object):
                 try:
                     ret_data = data.decode('gbk')
                 except:
-                    command = 'tail -n 100 {0} > {1};cat -v {1}'.format(log_file, remote_tmp_file)
+                    command = 'tail -n {2} {0} > {1};cat -v {1}'.format(log_file, remote_tmp_file,line_num)
                     stdin, stdout, stderr = ssh.exec_command(command=command)
                     ret_data = stdout.read()
             return ret_data
@@ -364,4 +363,74 @@ class ParamikoTool(object):
             # print('9999', e)
             return str(e)
 
+    def getDirInfo(self, ip, port, username, password, log_file):
+        try:
+            ssh = paramiko.SSHClient()
+            ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+            ssh.connect(ip, port, username, password)
+            command = 'du -sh *|ls -al {}|grep catalina'.format(log_file)
+            stdin, stdout, stderr = ssh.exec_command(command=command)
+            err = stderr.read().decode('gbk')
+            ssh.close()
+            if err != '':
+                runlog.error("the command is %s,error, file: [ %s ], line: [ %s ]" % (err,
+                    __file__, sys._getframe().f_lineno))
 
+                return 'the command is error!'
+            return stdout.read()
+        except Exception, e:
+            # print('9999', e)
+            return str(e)
+			
+			
+			
+    def execCommandInRemoteHostOutput(self, ip, username, port, password, *cmdlist):
+        '''
+        远程执行命令，并且将输出信息返回
+        :param ip:  ip或者host
+        :param username: 远程用户名
+        :param port: 端口
+        :param password: 密码
+        :param cmdlist: [['chmod', '+x', '/home/test/a.sh'], ['/bin/bash', '/home/test/a.sh']]
+        :return: ('true/false', '错误或者正确时候的输出信息')
+        '''
+        output_lst = []
+        if len(cmdlist) == 0:
+            print "======  execCommandInRemoteHostOutput parameters error  ========"
+            return output_lst.append((1, '', 'execCommandInRemoteHostOutput parameters error'))
+        try:
+            ssh = paramiko.SSHClient()
+            ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+            ssh.connect(str(ip), int(port), str(username), str(password))
+            for i in range(len(cmdlist)):
+                cmd = ''
+                for j in range(len(cmdlist[i])):
+                    cmd += '{0} '.format(cmdlist[i][j])
+                stdin, stdout, stderr = ssh.exec_command(command=cmd)
+                channel = stdout.channel
+                status = channel.recv_exit_status()
+                if int(status) != 0:  # 已经出错，不需要执行下面的命令
+                    return output_lst.append((status, '', '{}'.format(stderr.read())))
+                output_lst.append((status, '{}'.format(stdout.read()), '{}'.format(stderr.read())))
+                # try:
+                #     if err != '':
+                #         print("=========== 错误信息 1：[ %s ], file: [ %s ], line: [ %s ]" %
+                #               ('{}'.format(err), __file__, sys._getframe().f_lineno))
+                #         self.returnresult += 1
+                #         return 'false', '{}'.format(err)
+                #     else:
+                #         stdread = stdout.read().decode('utf-8')
+                #         output_lst.append(stdread)
+                # except Exception, e:
+                #     print("=========== 错误信息 2：[ %s ], file: [ %s ], line: [ %s ]" %
+                #           (e, __file__, sys._getframe().f_lineno))
+                #     self.returnresult += 1
+                #     return 'false', '{}'.format(e)
+        except Exception, e:
+            print("=========== 错误信息 3：[ %s ], file: [ %s ], line: [ %s ]" %
+                    (e, __file__, sys._getframe().f_lineno))
+            self.returnresult += 1
+            return output_lst
+        finally:
+            ssh.close()
+        return output_lst

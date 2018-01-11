@@ -27,6 +27,23 @@ urlpatterns = [
 
     ### 日志查看  #####
     url(r'^getLogInfo/$', getLogInfo, name='getLogInfo'),
+    url(r'^getShowLogDetail/$', getShowLogDetail, name='getShowLogDetail'),
+    url(r'^downloadlog/$', downloadlog, name='downloadlog'),
+
+
+
+    ### 配置文件更改  #####
+    url(r'^getAppDirs/$', getAppDirs, name='getAppDirs'),  # 获取目录结构
+    url(r'^getFileContent/$', getFileContent, name='getFileContent'),  # 获取文件内容返回
+    url(r'^renameDirOrFile/$', renameDirOrFile, name='renameDirOrFile'),
+    url(r'^dealUploadFile/$', dealUploadFile, name='dealUploadFile'),
+    url(r'^sshCreateFolder/$', sshCreateFolder, name='sshCreateFolder'),
+    url(r'^saveFileContent/$', saveFileContent, name='saveFileContent'),
+    url(r'^removeDirOrFile/$', removeDirOrFile, name='removeDirOrFile'),
+
+
+
+
 
 
     ### 发布 ###

@@ -8,7 +8,11 @@ from Controllers.loginControllerClass import LoginControllerClass
 from op_app.Controllers.taskManageControllerClass import TaskManageControllerClass
 from op_app.Controllers import (getNavControllerClass, getProjectNavControllerClass,
                                 getProjectDetailControllerClass,getHostInfoControllerClass,
-                                serviceManageActionControllerClass,logDetailControllerClass)
+                                serviceManageActionControllerClass,logDetailControllerClass,
+                                downloadLogControllerClass
+                                )
+from op_app.Controllers.configControllerClass import ConfigControllerClass
+
 
 
 def login(request):
@@ -154,8 +158,8 @@ def hostInfo(request):
     :param request: GET 传参，  project_id、 env_type、 select_app
     :return:
     '''
-    project_id, env_id, app_id = request.GET.get('project_id', '0'), request.GET.get('env_id', '0'), request.GET.get('app_id', '0')
-    print('project_id:', project_id, ' env_id:', env_id, ' select_app:', app_id)
+    # project_id, env_id, app_id = request.GET.get('project_id', '0'), request.GET.get('env_id', '0'), request.GET.get('app_id', '0')
+    # print('project_id:', project_id, ' env_id:', env_id, ' select_app:', app_id)
 
     data = {
         "data": [
@@ -254,13 +258,13 @@ def doServiceManageAction(request):
     :param request:
     :return:
     '''
-    project_id = request.POST.get('project_id', '0')
-    env_id = request.POST.get('env_id', '')
-    app_id = request.POST.get('app_id', '')
-    ip = request.POST.get('ip', '')
-    action = request.POST.get('action', '')
-    server_type = request.POST.get('server_type', '')
-    server_id = request.POST.get('server_id', '')
+    # project_id = request.POST.get('project_id', '0')
+    # env_id = request.POST.get('env_id', '')
+    # app_id = request.POST.get('app_id', '')
+    # ip = request.POST.get('ip', '')
+    # action = request.POST.get('action', '')
+    # server_type = request.POST.get('server_type', '')
+    # server_id = request.POST.get('server_id', '')
 
     '''根据项目、环境、应用、ip对对应的部署在此机器上的应用进行操作,
         1、确定要操作的机器，找出应用部署的用户名、端口、密码，部署路径等详细信息；
@@ -314,24 +318,30 @@ def doFunctionPage(request):
     print('server_id:', server_id)
 
     if action == 'log_show':  # 日志查看
-        data = {
-            'project_id': project_id,
-            'env_id': env_id,
-            'app_id': app_id,
-            'server_type': server_type,
-            'server_id': server_id,
-            'ip': ip,
-            'user': 'user1',
-            'logdirs': [
-                {
-                    'id': 11,
-                    'dir': '/usr/local/tomcat8080/logs'
-                },{
-                    'id': 12,
-                    'dir': '/usr/local/tomcat8081/logs'
-                }
-            ],
-        }
+        # data = {
+        #     'project_id': project_id,
+        #     'env_id': env_id,
+        #     'app_id': app_id,
+        #     'server_type': server_type,
+        #     'server_id': server_id,
+        #     'ip': ip,
+        #     'user': 'user1',
+        #     'logdirs': [
+        #         {
+        #             'id': 11,
+        #             'dir': '/usr/local/tomcat8080/logs'
+        #         },{
+        #             'id': 12,
+        #             'dir': '/usr/local/tomcat8081/logs'
+        #         }
+        #     ],
+        # }
+        i_class = logDetailControllerClass.LogDetailControllerClass(request)
+        data = i_class.logDir()
+        print 'nononononono'
+        if len(data) == 0:
+            print('hahahaahahahhahaah')
+            return render(request, '404.html', {'data': 'test 404'})
         return render(request, 'manage/log_show.html', {'data': data})
     elif action == 'task_manage':  # 任务管理
         data = {
@@ -348,7 +358,9 @@ def doFunctionPage(request):
     elif action == 'run_command':  # 命令执行
         return render(request, 'manage/run_command.html', {'data': 'test run_command'})
     elif action == 'configuration':  # 配置文件更改
-        return render(request, 'manage/configuration.html', {'data': 'test configuration'})
+        data = {}
+        data['remote_dir'] = '/config/HCS20170814'
+        return render(request, 'manage/configuration.html', {'data': data})
     elif action == 'machine_detail':  # 机器详情
         return render(request, 'manage/machine_detail.html', {'data': 'test machine_detail'})
     else:
@@ -395,21 +407,6 @@ def getLogDetail(request):
 
 
 def getLogInfo(request):
-    project_id = request.GET.get('project_id', '0')
-    env_id = request.GET.get('env_id', '')
-    app_id = request.GET.get('app_id', '')
-    ip = request.GET.get('ip', '')
-    # action = request.POST.get('action', '')
-    logdir_id = request.GET.get('logdir_id', '')
-    server_type = request.GET.get('server_type', '')
-    server_id = request.GET.get('server_id', '')
-
-    print('getLogDetail project_id:', project_id)
-    print('getLogDetail env_id:', env_id)
-    print('getLogDetail app_id:', app_id)
-    print('getLogDetail ip:', ip)
-    print('getLogDetail logdir_id:', logdir_id)
-
     data1 = {
         'data': [
             {
@@ -504,10 +501,13 @@ def getLogInfo(request):
             }
         ]
     }
-    if int(logdir_id) == 12:
-        return JsonResponse(data1, safe=False)
-    else:
-        return JsonResponse(data2, safe=False)
+    i_class = logDetailControllerClass.LogDetailControllerClass(request)
+    data = i_class.getlogInfo()
+    return JsonResponse(data, safe=False)
+    # if int(logdir_id) == 12:
+    #     return JsonResponse(data1, safe=False)
+    # else:
+    #     return JsonResponse(data2, safe=False)
 
 def getShowLogDetail(request):
     '''
@@ -516,42 +516,17 @@ def getShowLogDetail(request):
     :param request:
     :return:
     '''
-    project_id = request.GET.get('project_id', '0')
-    env_id = request.GET.get('env_id', '')
-    app_id = request.GET.get('app_id', '')
-    ip = request.GET.get('ip', '')
-    logdir_id = request.GET.get('logdir_id', '')
-    server_type = request.GET.get('server_type', '')
-    server_id = request.GET.get('server_id', '')
-    file_name = request.GET.get('file_name', '')
+    i_class = logDetailControllerClass.LogDetailControllerClass(request)
 
-    print('getShowLogDetail project_id:', project_id)
-    print('getShowLogDetail env_id:', env_id)
-    print('getShowLogDetail app_id:', app_id)
-    print('getShowLogDetail ip:', ip)
-    print('getShowLogDetail logdir_id:', logdir_id)
-    print('getShowLogDetail server_type:', server_type)
-    print('getShowLogDetail server_id:', server_id)
-    print('getShowLogDetail file_name:', file_name)
-
-    data = {
-        'data': '''{"hostname":"10.41.0.106:10006","remote_addr":"116.211.165.13","date":"2018-01-03T13:39:21+08:00","request_method":"POST","path_info":"/identity/liveness_selfie_verification","query_string":"","http_version":"HTTP/1.0","http_status":200,"user_agent":null,"referer":null,"content_type":"application/json;charset=utf-8","content_length":217,"runtime":1.004671985,"request_id":"TID990cc530bcfb4fa2b18c73dbc78b4eab","key_id":"64b72c0cebee46eb87620ff99c2be78b","params":{"captures":[]},"uri":"/identity/liveness_selfie_verification","format":"JPEG","quality":85,"image_id":"2a01dbb249d5443eb92f6cd6d65792ab","status":"OK"}
-","remote_addr":"10.41.0.253","date":"2018-01-03T13:59:54+08:00","request_method":"POST","path_info":"/identity/selfie_idcard_watermark_verification","query_string":"","http_version":"HTTP/1.1","http_status":200,"user_agent":"HttpComponents/1.1","referer":null,"content_type":"application/json;charset=utf-8","content_length":150,"runtime":0.98213683,"request_id":"TIDc1f4e401d89f452580880020936071c6","params":{"watermark_picture_url":"http://ifcs.bqjr.cn:8081/2018/01/03/13/511011199006192527.jpg","selfie_auto_rotate":"true","idcard_auto_rotate":"true","selfie_is_multifaces":"true","captures":[]},"uri":"/identity/selfie_idcard_watermark_verification","format":"JPEG","quality":78,"image_id":"1d5ded73dd1747baa3bfa0992b990897","status":"OK","exif_orient":1}
-{"hostname":"10.41.0.106:10006","remote_addr":"10.41.0.253","date":"2018-01-03T14:00:14+08:00","request_method":"POST","path_info":"/identity/selfie_idcard_watermark_verification","query_string":"","http_version":"HTTP/1.1","http_status":200,"user_agent":"HttpComponents/1.1","referer":null,"content_type":"application/json;charset=utf-8","content_length":151,"runtime":0.817649989,"request_id":"TID54f7f8026f7343e1a121b54eb181f64f","params":{"watermark_picture_url":"http://ifcs.bqjr.cn:8081/2018/01/03/14/422801198406132414.jpg","selfie_auto_rotate":"true","idcard_auto_rotate":"true","selfie_is_multifaces":"true","captures":[]},"uri":"/identity/selfie_idcard_watermark_verification","format":"JPEG","quality":100,"image_id":"5e216f4d72d64d5f9964a23b4631a6e6","status":"OK"}
-{"hostname":"10.41.0.106:10006","remote_addr":"10.41.0.253","date":"2018-01-03T14:00:14+08:00","request_method":"GET","path_info":"/","query_string":"","http_version":"HTTP/1.1","http_status":404,"user_agent":"Zabbix","referer":null,"content_type":"application/json","content_length":null,"runtime":0.000159685}
-{"hostname":"10.41.0.106:10006","remote_addr":"10.41.0.253","date":"2018-01-03T14:00:20+08:00","request_method":"GET","path_info":"/","query_string":"","http_version":"HTTP/1.1","http_status":404,"user_agent":"Zabbix","referer":null,"content_type":"application/json","content_length":null,"runtime":0.000309835}
-{"hostname":"10.41.0.106:10006","remote_addr":"10.41.0.253","date":"2018-01-03T14:00:24+08:00","request_method":"POST","path_info":"/identity/selfie_idcard_watermark_verification","query_string":"","http_version":"HTTP/1.1","http_status":200,"user_agent":"HttpComponents/1.1","referer":null,"content_type":"application/json;charset=utf-8","content_length":151,"runtime":0.940364446,"request_id":"TIDa2c8a73d93144a3484b580faad273d13","params":{"watermark_picture_url":"http://ifcs.bqjr.cn:8081/2018/01/03/14/150421198411060087.jpg","selfie_auto_rotate":"true","idcard_auto_rotate":"true","selfie_is_multifaces":"true","captures":[]},"uri":"/identity/selfie_idcard_watermark_verification","format":"JPEG","quality":78,"image_id":"302c6ac33ba547a99a6ff9b711230958","status":"OK","exif_orient":1}
-{"hostname":"10.41.0.106:10006","remote_addr":"116.211.165.16","date":"2018-01-03T14:00:26+08:00","request_method":"POST","path_info":"/identity/liveness_selfie_verification","query_string":"","http_version":"HTTP/1.0","http_status":200,"user_agent":null,"referer":null,"content_type":"application/json;charset=utf-8","content_length":218,"runtime":0.973778874,"request_id":"TID88eecba180d24a9483351ec87195dc04","key_id":"64b72c0cebee46eb87620ff99c2be78b","params":{"captures":[]},"uri":"/identity/liveness_selfie_verification","format":"JPEG","quality":85,"image_id":"d03196f622e9410d84ddd9bd669b0b83","status":"OK"}
-{"hostname":"10.41.0.106:10006","remote_addr":"10.41.0.253","date":"2018-01-03T14:00:42+08:00","request_method":"GET","path_info":"/","query_string":"","http_version":"HTTP/1.1","http_status":404,"user_agent":"Zabbix","referer":null,"content_type":"application/json","content_length":null,"runtime":0.000155472}
-{"hostname":"10.41.0.106:10006","remote_addr":"10.41.0.253","date":"2018-01-03T14:00:54+08:00","request_method":"POST","path_info":"/identity/selfie_idcard_watermark_verification","query_string":"","http_version":"HTTP/1.1","http_status":200,"user_agent":"HttpComponents/1.1","referer":null,"content_type":"application/json;charset=utf-8","content_length":149,"runtime":0.897179794,"request_id":"TIDbfb1309c645a4765ae6eddb53e23b4a0","params":{"watermark_picture_url":"http://ifcs.bqjr.cn:8081/2017/12/30/15/15252719720510393X.jpg","selfie_auto_rotate":"true","idcard_auto_rotate":"true","selfie_is_multifaces":"true","captures":[]},"uri":"/identity/selfie_idcard_watermark_verification","format":"JPEG","quality":94,"image_id":"17abe2c740bd4c4988aac51ca35cfeeb","status":"OK","exif_orient":1}
-{"hostname":"10.41.0.106:10006","remote_addr":"10.41.0.253","date":"2018-01-03T14:01:07+08:00","request_method":"POST","path_info":"/identity/selfie_idcard_watermark_verification","query_string":"","http_version":"HTTP/1.1","http_status":200,"user_agent":"HttpComponents/1.1","referer":null,"content_type":"application/json;charset=utf-8","content_length":151,"runtime":1.165136439,"request_id":"TID45b6f468248e4a2ba45163e68388b6de","params":{"watermark_picture_url":"http://ifcs.bqjr.cn:8081/2018/01/03/13/150424199710015124.jpg","selfie_auto_rotate":"true","idcard_auto_rotate":"true","selfie_is_multifaces":"true","captures":[]},"uri":"/identity/selfie_idcard_watermark_verification","format":"JPEG","quality":100,"image_id":"5b49524f35ff45bba5f17134ff0640d1","status":"OK"}
-{"hostname":"10.41.0.106:10006","remote_addr":"218.11.4.12","date":"2018-01-03T14:01:12+08:00","request_method":"POST","path_info":"/identity/liveness_selfie_verification","query_string":"","http_version":"2.3.5","http_status":200,"user_agent":"Wallet/2.3.5 (iPhone; iOS 11.0.3; Scale/3.00)","referer":null,"content_type":"application/json;charset=utf-8","content_length":232,"runtime":1.173941963,"request_id":"TID404d31718d1344b29db300e769d8f9fa","params":{"captures":[]},"uri":"/identity/liveness_selfie_verification","format":"JPEG","exif_orient":1,"quality":78,"image_id":"a07024c0c95c4a7dbdaa87c10713f6fb","status":"OK"}
-{"hostname":"10.41.0.106:10006","remote_addr":"10.41.0.253","date":"2018-01-03T14:01:24+08:00","request_method":"POST","path_info":"/identity/selfie_idcard_watermark_verification","query_string":"","http_version":"HTTP/1.1","http_status":200,"user_agent":"HttpComponents/1.1","referer":null,"content_type":"application/json;charset=utf-8","content_length":151,"runtime":0.976346191,"request_id":"TID34c0334acbc04f66a18a361fdaca5ccf","params":{"idcard_picture_url":"http://prdmmtoss01.vpc100-oss-cn-shenzhen.aliyuncs.com/prd/user/1712319823058401/1001.jpg?Expires=1530597680&OSSAccessKeyId=LTAIDprnSAmmYlmV&Signature=r89VYvrWi3AmuFVFRc%2FanqJudBg%3D","selfie_url":"http://prdmmtoss01.vpc100-oss-cn-shenzhen.aliyuncs.com/prd/user/1712319823058401/1004.jpg?Expires=1530597680&OSSAccessKeyId=LTAIDprnSAmmYlmV&Signature=0juvLXKaq1jxfkd1EQoQQ9sjkcE%3D","watermark_picture_url":"http://ifcs.bqjr.cn:8081/2018/01/03/14/510322199303306759.jpg","selfie_auto_rotate":"true","idcard_auto_rotate":"true","selfie_is_multifaces":"true","captures":[]},"uri":"/identity/selfie_idcard_watermark_verification","format":"JPEG","quality":80,"image_id":"3acc2379f98b4697b23be2093a8fb478","status":"OK"}
-{"hostname":"10.41.0.106:10006","remote_addr":"10.41.0.253","date":"2018-01-03T14:01:24+08:00","request_method":"POST","path_info":"/identity/selfie_idcard_watermark_verification","query_string":"","http_version":"HTTP/1.1","http_status":200,"user_agent":"HttpComponents/1.1","referer":null,"content_type":"application/json;charset=utf-8","content_length":151,"runtime":0.981608297,"request_id":"TID26ae6df2e0684121b2a42196b6dcc3fe","params":{"idcard_picture_url":"http://prdmmtoss01.vpc100-oss-cn-shenzhen.aliyuncs.com/prd/user/1709179556598201/1001.jpg?Expires=1530597680&OSSAccessKeyId=LTAIDprnSAmmYlmV&Signature=yt%2BsNO%2FjVEeU2vjGPtj%2FXYAmgtA%3D","selfie_url":"http://prdmmtoss01.vpc100-oss-cn-shenzhen.aliyuncs.com/prd/user/1709179556598201/1004.jpg?Expires=1530597680&OSSAccessKeyId=LTAIDprnSAmmYlmV&Signature=FyBdoEH3AMggEKdsEFa1HPF3BV0%3D","watermark_picture_url":"http://ifcs.bqjr.cn:8081/2018/01/03/14/140321199104111857.jpg","selfie_auto_rotate":"true","idcard_auto_rotate":"true","selfie_is_multifaces":"true","captures":[]},"uri":"/identity/selfie_idcard_watermark_verification","format":"JPEG","quality":80,"image_id":"7da18732c7974bc9a8c52594a7d4e086","status":"OK"}
-{"hostname":"10.41.0.106:10006","remote_addr":"10.41.0.253","date":"2018-01-03T14:01:25+08:00","request_method":"POST","path_info":"//identity/liveness_selfie_verification","query_string":"","http_version":"HTTP/1.1","http_status":200,"user_agent":null,"referer":null,"content_type":"application/json;charset=utf-8","content_length":232,"runtime":1.301026609,"request_id":"TIDe5ed6da3a910403ca41b4406e72d4bcb","params":{"liveness_data_url":"http://static.xjd.billionsfinance.cn/imgsys/customer_pic/2018-01-03/5783672_package","selfie_url":"http://static.xjd.billionsfinance.cn/imgsys/customer_pic/2018-01-03/24416650_vivo_idCard_face.jpg","selfie_auto_rotate":"1","captures":[]},"uri":"/identity/liveness_selfie_verification","format":"JPEG","quality":100,"image_id":"cba9f2b7b07f4315a35cf2ee3dd42d5f","status":"OK"}''',
-        'title': '运维平台-日志查看-日志详情'
-    }
+    data = dict()
+    data['title'] = '运维平台-日志查看-日志详情'
+    data['data'] = i_class.getLogDetail()
     return render(request, 'manage/logdetail.html', {'data': data})
+
+def downloadlog(request):
+    i_class = downloadLogControllerClass.DownloadLogControllerClass(request)
+    download_url = i_class.download()
+    return JsonResponse(download_url, safe=False)
 
 
 
@@ -564,14 +539,6 @@ def saveCrontabContent(request):
     '''
     c_taskManage = TaskManageControllerClass(request)
     is_ok = c_taskManage.saveCrontabContent()
-
-    # project_id = request.POST.get('project_id', '0')
-    # env_id = request.POST.get('env_id', '')
-    # app_id = request.POST.get('app_id', '')
-    # server_type = request.POST.get('server_type', '')
-    # server_id = request.POST.get('server_id', '')
-    # content = request.POST.get('content', '')
-
     return JsonResponse(is_ok, safe=False)
 
 def getCrontabContent(request):
@@ -582,31 +549,38 @@ def getCrontabContent(request):
     '''
     c_taskManage = TaskManageControllerClass(request)
     data = c_taskManage.getCrontabContent()
-
-    # project_id = request.POST.get('project_id', '0')
-    # env_id = request.POST.get('env_id', '')
-    # app_id = request.POST.get('app_id', '')
-    # server_type = request.POST.get('server_type', '')
-    # server_id = request.POST.get('server_id', '')
-#     data = '''
-# */10 * * * * /usr/sbin/ntpdate -u cn.pool.ntp.org >/dev/null 2>&1
-# */1 * * * * cd /usr/local/gse/gseagent; ./cron_agent.sh 1>/dev/null 2>&1
-# */10 * * * * cd /usr/local/test 1>/dev/null 2>&1
-#     '''
     return JsonResponse(data, safe=False)
 
 
 
 
+def getAppDirs(request):
 
-
-
-
-
-
-
-
-
+    c_config = ConfigControllerClass()
+    return JsonResponse(c_config.getAppDirs(request), safe=False)
+def getFileContent(request):
+    c_config = ConfigControllerClass()
+    return JsonResponse(c_config.getFileContent(request), safe=False)
+def dealUploadFile(request):
+    c_config = ConfigControllerClass()
+    is_ok = c_config.dealUploadFile(request)
+    return JsonResponse(is_ok, safe=False)
+def renameDirOrFile(request):
+    c_config = ConfigControllerClass()
+    is_ok = c_config.renameDirOrFile(request)
+    return JsonResponse(is_ok, safe=False)
+def sshCreateFolder(request):
+    c_config = ConfigControllerClass()
+    is_ok = c_config.sshCreateFolder(request)
+    return JsonResponse(is_ok, safe=False)
+def saveFileContent(request):
+    c_config = ConfigControllerClass()
+    is_ok = c_config.saveFileContent(request)
+    return JsonResponse(is_ok, safe=False)
+def removeDirOrFile(request):
+    c_config = ConfigControllerClass()
+    is_ok = c_config.removeDirOrFile(request)
+    return JsonResponse(is_ok, safe=False)
 
 
 
@@ -616,7 +590,40 @@ def getCrontabContent(request):
 
 ### 测试代码 #####
 def test(request):
-    # m_data = CmdbModelClass()
+    from op_app.Extends.paramikoTool import ParamikoTool
+    t_pt = ParamikoTool()
+    cmds = [['chmod', '+x', '/home/beehive/test/script/bin'],
+            ['python', '/home/beehive/test/script/bin/get_dirs_files.py', '/home/beehive/test']]
+    ret_data = t_pt.execCommandInRemoteHostOutput('10.83.36.86', 'beehive', '10022', 'beehive_1', *cmds)
+    print('type of ret_data:', type(ret_data))
+    print('ret_data:', ret_data)
+
+    cmd_len = len(cmds)
+    ret_data_len = len(ret_data)
+    if ret_data:
+        try:
+            if len(ret_data) < cmd_len:  # 命令未全部执行完就已经报错
+                print('cmd: [ %s ], error_info: [ %s ]' %
+                        (cmds[ret_data_len-1], ret_data[ret_data_len-1][1]))
+                return JsonResponse('false', safe=False)
+            ret_status = ret_data[ret_data_len - 1][0]
+            if int(ret_status) != 0:  # 执行最后一条命令出错
+                print('Exec cmd: [ %s ] failed, error_info: [ %s ]' %
+                        (cmds[ret_data_len - 1], ret_data[ret_data_len - 1][1]))
+                return JsonResponse('false', safe=False)
+            import json
+            data = ret_data[ret_data_len - 1][1]
+            print('type of data: ', type(data))
+            print('data:', data)
+
+            # json_data = json.loads(data, encoding='utf-8')
+            list_data = eval(data)
+            print('type of list_data: ', type(list_data))
+            print('list_data:', list_data)
+
+        except Exception as e:
+            print('Catch error: [ %s ]' % (e))
+    # print('ret_data:', ret_data[len(cmds) - 1])
     return JsonResponse('123', safe=False)
 
 
