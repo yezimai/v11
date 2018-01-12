@@ -56,17 +56,19 @@ class DownloadLogControllerClass(object):
         instance = appConfigDetailClass.appConfigDetail()
         dirname = instance.app_LogDir(self.app_id, self.server_type, self.server_id, self.logdir_id) # 获取app的日志目录
         if len(dirname) == 0:
+            runlog.error("the APP dirname is null, file: [ %s ], line: [ %s ]" % (
+                __file__, sys._getframe().f_lineno))
             return 'no found the logdir'
         logfile = dirname[0][0] + os.sep + self.logfilename  # 得到app的日志的绝对路径
-        res = instance.AppConfigDetail(self.server_type, self.app_id, self.server_id, self.env_id,
+        res, status = instance.AppConfigDetail(self.server_type, self.app_id, self.server_id, self.env_id,
                                        self.project_id)
         print('logapp-1-res', res, logfile)
-        if len(res) == 0:
+        if not status:
             runlog.error("the APP Data is null, file: [ %s ], line: [ %s ]" % (
                 __file__, sys._getframe().f_lineno))
         connectmessage = {'ip': self.ip,
                           'port': res[0][8],
-                          'user': res[0][1],
+                          'user': res[0][9],
                           'password': res[0][7],
                           'remote_file': logfile,
                           'local_dir': os.path.dirname(os.path.abspath(__file__)) + '/../static/log/'
@@ -91,7 +93,7 @@ class DownloadLogControllerClass(object):
         else:
 
             os.chdir(connectmessage['local_dir'])   # 切换到服务器上存放的日志目录路径下，将下载的文件加上ip后，重命名
-            print filename, self.logfilename
+            # print filename, self.logfilename
             os.system('mv  ' + self.logfilename + '  ' + filename)
             # 记录用户访问记录
             audit_log = Operation_dbModelClass()

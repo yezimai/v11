@@ -338,9 +338,9 @@ def doFunctionPage(request):
         # }
         i_class = logDetailControllerClass.LogDetailControllerClass(request)
         data = i_class.logDir()
-        print 'nononononono'
+        # print 'nononononono'
         if len(data) == 0:
-            print('hahahaahahahhahaah')
+            #print('hahahaahahahhahaah')
             return render(request, '404.html', {'data': 'test 404'})
         return render(request, 'manage/log_show.html', {'data': data})
     elif action == 'task_manage':  # 任务管理

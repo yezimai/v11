@@ -82,33 +82,41 @@ class ParamikoTool(object):
             ret_list = []
         return ret_list
 
-    def execCommand(self, ip, username, port, password, cmdlist):
-        if len(cmdlist) == 0:
-            print "======  execCommandInRemoteHost parameters error  ========"
+#cmdlist = '"test -d {0}/server_manage||mkdir -p {0}/server_manage".format(output_lst[0][1])'
+    def execCommand(self, ip, username, port, password, cmd):
+       # print cmd
+        if len(cmd) == 0:
+            print "======  execCommand parameters error  ========"
             return 'false'
         try:
             ssh = paramiko.SSHClient()
             ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
             ssh.connect(str(ip), int(port), str(username), str(password))
 
-            stdin, stdout, stderr = ssh.exec_command(command=cmdlist)
+            stdin, stdout, stderr = ssh.exec_command(command=cmd)
             channel = stdout.channel
             status = channel.recv_exit_status()
-            print status
+            #print status, cmd
             err = stderr.read()  # 标准错误输出
             try:
                 if err != '':
-                    print "=========== 错误信息 1：" + str(err).decode('utf-8')
-                    self.returnresult+=1
-                    return 'false'
+                    return False
                 else:
-                    stdread = stdout.read().decode('utf-8')
-                    print "===== 输出信息 ：[ " + str(stdread) + " ] ======"
-                    return 'true'
-            except Exception, e:
-                print "=========== 错误信息 3：" + str(e)
-                self.returnresult += 1
-                return 'false'
+                    return True
+            except Exception as e:
+                print '========e=='+e
+            # try:
+            #     if err != '':
+            #         print "=========== 错误信息 1：" + str(err).decode('utf-8')
+            #         self.returnresult+=1
+            #         return 'false'
+            #     else:
+            #         print "===== 输出信息 ：[ "" ] ======"
+            #         return 'true'
+            # except Exception, e:
+            #     print "=========== 错误信息 3：" + str(e)
+            #     self.returnresult += 1
+            #     return 'false'
             ssh.close()
         except Exception, e:
             print "=========== 错误信息 4：" + str(e)
@@ -364,24 +372,38 @@ class ParamikoTool(object):
             return str(e)
 
     def getDirInfo(self, ip, port, username, password, log_file):
+
         try:
             ssh = paramiko.SSHClient()
             ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+            # print 'a'
             ssh.connect(ip, port, username, password)
-            command = 'du -sh *|ls -al {}|grep catalina'.format(log_file)
+            # print 'b'
+            cdcommand = 'cd ' + log_file + '  &&  '
+            command = cdcommand + r"""ls -lht | grep ^- | awk '{for(i=3;i<=NF;i++) {if (i==6 || i==7) {printf "%s-",$i}else if (i==NF){printf "%s\n",$i}else{printf "%s|", $i}}}'"""
+            # print command
             stdin, stdout, stderr = ssh.exec_command(command=command)
-            err = stderr.read().decode('gbk')
+            channel = stdout.channel
+            status = channel.recv_exit_status()
+            print status
+            stdreadlines = stdout.readlines()
             ssh.close()
-            if err != '':
-                runlog.error("the command is %s,error, file: [ %s ], line: [ %s ]" % (err,
-                    __file__, sys._getframe().f_lineno))
-
-                return 'the command is error!'
-            return stdout.read()
+            retlist = []
+            for line in stdreadlines:
+                itemlist = line.split('|')
+                dic = {}
+                dic['no'] = stdreadlines.index(line)+1
+                dic['owner'] = itemlist[0]
+                dic['group'] = itemlist[1]
+                dic['size'] = itemlist[2]
+                dic['last_modify'] = itemlist[3]
+                dic['file'] = itemlist[4].replace('\n', '')
+                retlist.append(dic)
+            return [retlist, True]
         except Exception, e:
-            # print('9999', e)
-            return str(e)
-			
+            print 'connect error '+str(e)
+            return [str(e), False]
+
 			
 			
     def execCommandInRemoteHostOutput(self, ip, username, port, password, *cmdlist):
@@ -395,6 +417,7 @@ class ParamikoTool(object):
         :return: ('true/false', '错误或者正确时候的输出信息')
         '''
         output_lst = []
+        #print('cmdlist',ip,username,password,port,cmdlist)
         if len(cmdlist) == 0:
             print "======  execCommandInRemoteHostOutput parameters error  ========"
             return output_lst.append((1, '', 'execCommandInRemoteHostOutput parameters error'))

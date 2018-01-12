@@ -18,6 +18,7 @@ class ManageActionControllerClass(object):
         self.server_type = self.request.POST.get('server_type', '')
         self.server_id = self.request.POST.get('server_id', '')
         self.action = self.request.POST.get('action', '')
+        self.pt = paramikoTool.ParamikoTool()
 
     def getAction(self):
         if self.project_id == '' or self.env_id == '' or self.app_id == '' or self.ip == ''\
@@ -28,9 +29,9 @@ class ManageActionControllerClass(object):
             return False
         #  根据项目、环境、应用、ip对对应的部署在此机器上的应用信息
         instance = appConfigDetailClass.appConfigDetail()
-        res = instance.AppConfigDetail(self.server_type, self.app_id, self.server_id,\
+        res, res_status = instance.AppConfigDetail(self.server_type, self.app_id, self.server_id,\
                                         self.env_id, self.project_id)
-        if not res:
+        if not res_status:
             runlog.error("the APP Data is null, file: [ %s ], line: [ %s ]" % (
                             __file__, sys._getframe().f_lineno))
             return False
@@ -45,6 +46,7 @@ class ManageActionControllerClass(object):
             res_dic['app_name'] = i[6]
             res_dic['pass'] = i[7]
             res_dic['sshport'] = i[8]
+            res_dic['sshuser'] = i[9]
         if app_type == '1':
             res_dic['apptype'] = 'tomcat'
         elif app_type == '2':
@@ -61,13 +63,19 @@ class ManageActionControllerClass(object):
                 # print('rsync-succ----->\033[31;1m\033[0m')
                 runlog.info("---rsync-file to remote-success----:file: [ %s ], line: [ %s ]" % (
                     __file__, sys._getframe().f_lineno))
-                exec_dir = '{}{}/{}'.format(self.remote_dir, res_dic['app_name'], 'scripts/bin/')  # 远程执行的目录
+                exec_dir = '{}/{}/{}'.format(self.remote_dir, res_dic['app_name'], 'scripts/bin/')  # 远程执行的目录
+                # 在bqadm家目录权限设为777
+                # mkdir_cmd = "chmod 777 -R {}".format(remote_home)
+                # mkdir_res = self.pt.execCommand(ip, username, sshport, password, mkdir_cmd)
                 if self.action == 'start':  # 判断执行动作
+
                     # cmd = 'cd {}&&chmod a+x *.sh&&nohup ./startapp.sh 1>/dev/null 2>&1 &&sleep 10&&ps -ef|grep {}|grep {}|grep -v grep|wc -l' \
                     #     .format(exec_dir, res_dic['appdir'], res_dic['install_user'])
-                    cmd = 'cd {}&&chmod a+x *.sh&&nohup ./startapp.sh 1>/dev/null 2>&1'.format(exec_dir)
+                    cmd = 'chmod 777 -R {};sudo su - {} -c "cd {}&&nohup ./startapp.sh 1>/dev/null 2>&1"'\
+                            .format(self.remote_dir, res_dic['install_user'], exec_dir)
                 elif self.action == 'stop':
-                    cmd = 'cd {}&&chmod a+x *.sh&&nohup ./stopapp.sh 1>/dev/null 2>&1'.format(exec_dir)
+                    cmd = 'chmod 777 -R {};sudo su - {} -c "cd {}&&./stopapp.sh 1>/dev/null 2>&1"'\
+                            .format(self.remote_dir, res_dic['install_user'], exec_dir)
                 else:  # action参数无效时
                     runlog.error("[ERROR] --invaild-action------, Catch exception:, file: [ %s ], line: [ %s ]"
                                 % (__file__,sys._getframe().f_lineno))
@@ -146,15 +154,29 @@ class ManageActionControllerClass(object):
         return True
 
     def rsyncFile(self, ip, **r_dic):
-        username, sshport, password = r_dic['install_user'], r_dic['sshport'], r_dic['pass']
+        username, sshport, password = r_dic['sshuser'], r_dic['sshport'], r_dic['pass']
         # 利用rsync脚本将配置文件和启动脚本推送过去,rsync可以自动创建文件夹，所以注释掉上面的代码
-        self.remote_dir = '{}/{}/{}/'.format('/home', username, 'service_manage')
-        connect_args = [ip, username, sshport, password, self.app_path, self.remote_dir]
+
+        # self.remote_dir = '{}/{}/{}/'.format('/home', username, 'service_manage')
         chmod_cmd = [['chmod', '+x', self.rsyncScriptPath]]
         if pub.execShellCommand(*chmod_cmd) == False:
             runlog.error("Exec chmod_cmd command error, file: [ %s ], line: [ %s ]" % (
                             __file__, sys._getframe().f_lineno))
             return False
+        # 寻找服务器的家目录的命令
+        remote_home_dir_cmd = [["grep", "^{}:".format(username), "/etc/passwd|awk -F ':' '{print $6}'"]]
+        output_lst = self.pt.execCommandInRemoteHostOutput(self.ip, username, sshport, password, *remote_home_dir_cmd)
+        print('oooouuutttpputt------>\033[42;1m%s\033[0m' %output_lst)
+        if output_lst[0][0] != 0:
+            return False
+        remote_home = output_lst[0][1][:-1]  #remot_home = /home/bqadm
+        print('rrrrrrr_home',remote_home)
+
+        # print('remote_home_dir_cmd',remote_home_dir_cmd,type(remote_home_dir_cmd),len(remote_home_dir_cmd))
+        # /home/bqadm
+
+        self.remote_dir = '{}/service_manage'.format(remote_home)
+        connect_args = [ip, username, sshport, password, self.app_path, self.remote_dir]
         if pub.rsyncServerToClients(self.rsyncScriptPath, *connect_args) != True:
             runlog.error("[ERROR] rsync file to client error, Catch exception:, file: [ %s ], line: [ %s ]" % (
                 __file__, sys._getframe().f_lineno))
@@ -162,10 +184,10 @@ class ManageActionControllerClass(object):
         return True
 
     def runScript(self, ip, cmd, **r_dic):
-        username, sshport, password = r_dic['install_user'], r_dic['sshport'], r_dic['pass']
-        pt = paramikoTool.ParamikoTool()
-        status = pt.execCommand(ip, username, sshport, password, cmd)
-        if status == 'true':
+        username, sshport, password = r_dic['sshuser'], r_dic['sshport'], r_dic['pass']
+
+        status = self.pt.execCommand(ip, username, sshport, password, cmd)
+        if status:
             runlog.info("--script execute-success--:file: [ %s ], line: [ %s ]" % (
                 __file__, sys._getframe().f_lineno))
             return True

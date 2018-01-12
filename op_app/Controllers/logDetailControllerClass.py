@@ -43,9 +43,9 @@ class LogDetailControllerClass(object):
                 return 'no permissions to view'
             # 获取app的用户名和密码
             instance = appConfigDetailClass.appConfigDetail()
-            res = instance.AppConfigDetail(self.server_type, self.app_id, self.server_id, self.env_id, self.project_id)
+            res, status = instance.AppConfigDetail(self.server_type, self.app_id, self.server_id, self.env_id, self.project_id)
             print('logapp--res',res)
-            if not res:
+            if not status:
                 runlog.error("the APP Data is null, file: [ %s ], line: [ %s ]" % (
                     __file__, sys._getframe().f_lineno))
             res_dic = dict()
@@ -56,6 +56,7 @@ class LogDetailControllerClass(object):
                 res_dic['app_name'] = i[6]
                 res_dic['pass'] = i[7]
                 res_dic['sshport'] = i[8]
+                res_dic['sshuser'] = i[9]
             # 获取远程服务器日志目录指定行数的内容
             # print('dict_res',res_dic)
             if res_dic['app_type'] == '1': # app类型是tomcat
@@ -64,7 +65,7 @@ class LogDetailControllerClass(object):
                 # print('00---00',log_file_path)
                 elif self.action == 'stop':
                     log_file_path = '/home/{}/service_manage/{}/scripts/log/stopapp.sh.log'.format(\
-                        res_dic['install_user'], res_dic['app_name'])
+                        res_dic['sshuser'], res_dic['app_name'])
                 elif self.action == 'log_show':
                     logdir_id = self.request.GET.get('logdir_id', '')
                     file_name = self.request.GET.get('file_name','')
@@ -86,7 +87,7 @@ class LogDetailControllerClass(object):
                         __file__, sys._getframe().f_lineno))
                     return 'invaild action to find the logfile'
                 pt = ParamikoTool()  # 实例化对象后，获取日志默认行数
-                log_res = pt.getlogrow(self.ip, res_dic['sshport'], res_dic['install_user'], \
+                log_res = pt.getlogrow(self.ip, res_dic['sshport'], res_dic['sshuser'], \
                                        res_dic['pass'], log_file_path, self.line_num)
                 # print('-------------',log_res)
                 # 记录用户访问记录
@@ -116,10 +117,10 @@ class LogDetailControllerClass(object):
             return ['no permissions to view']
         # 获取app的用户名和密码
         instance = appConfigDetailClass.appConfigDetail()
-        res = instance.AppConfigDetail(self.server_type, self.app_id, self.server_id, self.env_id,
+        res, status= instance.AppConfigDetail(self.server_type, self.app_id, self.server_id, self.env_id,
                                        self.project_id)
         print('logapp--res', res)
-        if len(res) == 0:
+        if not status:
             runlog.error("the APP Data is null, file: [ %s ], line: [ %s ]" % (
                 __file__, sys._getframe().f_lineno))
         data['user'] = res[0][1]
@@ -159,45 +160,22 @@ class LogDetailControllerClass(object):
 
         # 获取app的用户名和密码
         instance = appConfigDetailClass.appConfigDetail()
-        res = instance.AppConfigDetail(self.server_type, self.app_id, self.server_id, self.env_id,
+        res, Status = instance.AppConfigDetail(self.server_type, self.app_id, self.server_id, self.env_id,
                                        self.project_id)
-        # print('logapp--res', res)
-        if not res:
+        #print('pppppppppppplogapp--res', res)
+        if not Status:
             runlog.error("the APP Data is null, file: [ %s ], line: [ %s ]" % (
                 __file__, sys._getframe().f_lineno))
 
-        pk = ParamikoTool()
-        #print('<<<<<<<<----\033[42;1m%s,%s,%s\033[0m'%(self.ip, res, res_dir))
-        #
-        data_res = pk.getDirInfo(self.ip, res[0][8], res[0][1], res[0][7], res_dir[0][0])
-
-        # print('data is 777', data_res, type(data_res))
+        pk = ParamikoTool()  # 实例化对象，调用方法后将文件大小按时间排序展示
+        data_res, status = pk.getDirInfo(self.ip, res[0][8], res[0][9], res[0][7], res_dir[0][0])
         # '''data='-rw-rw-r-- 1 beehive beehive  22900 Feb  8  2017 catalina.2017-02-08.log\n
         # -rw-rw-r-- 1 beehive beehive 171910 Feb  9  2017 catalina.2017-02-09.log\n
-        #''''
-        if len(data_res) == 0:
-            runlog.error("getDirInfo is null, file: [ %s ], line: [ %s ]" % (
-                __file__, sys._getframe().f_lineno))
-        # 得到的数据按\n分割得到一个列表
-        res_list = data_res.split('\n')
-        # print('rrrrrr',res_list)
-        data_list = []
-        for i in range(len(res_list)):  # 循环这个列表，在将列表中的每个元素按照' '分隔后取出对应结果
-            if len(res_list[i]):    # 排除空列表
-                data_dic = dict()
-                data_dic['no'] = i+1
-                son_list = res_list[i].split()
-                # print('son_list9999',son_list)
-                # print('<jjjjjj----\033[42;1m%s\033[0m' %j)
-                data_dic['file'] = son_list[8]
-                data_dic['owner'] = son_list[2]
-                data_dic['group'] = son_list[3]
-                data_dic['size'] = '{}M'.format(int(son_list[4])/1024)
-                data_dic['last_modify'] = '{}-{}-{}'.format(res_list[i].split()[5],res_list[i].split()[6],res_list[i].split()[7])
-                # print('-------->',data_dic)
-                data_list.append(data_dic)
+        #print('2222data_res------>\033[31;1m%s\033[0m' % data_res)
+        if not status:
+            runlog.error("getDirInfo is null, file: [ %s ], line: [ %s ],error:[ %s ]" % (
+                __file__, sys._getframe().f_lineno, data_res))
         final_data_dic = dict()  # 将得到的结果按字典的格式返回
-        final_data_dic['data'] = data_list
-        # print('FINAL-\033[42;1m%s\033[0m' %(final_data_dic))
-
+        final_data_dic['data'] = data_res
         return final_data_dic
+
