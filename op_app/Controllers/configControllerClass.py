@@ -6,11 +6,40 @@ import os
 import sys
 import time
 from op_app.Extends.paramikoTool import ParamikoTool
+from op_app.logger.log import runlog
+from op_app.lib.appConfigDetailClass import appConfigDetail
+from op_app.lib import pub
+class ConfigControllerClass(appConfigDetail):
+    def __init__(self, request):
+        super(ConfigControllerClass,self).__init__()
+        self.request = request
+        self.uid = self.request.user.id
+        self.project_id = self.request.GET.get('project_id', '')
+        self.env_id = self.request.GET.get('env_id', '')
+        self.app_id = self.request.GET.get('app_id', '')
+        self.ip = self.request.GET.get('ip', '')
+        self.server_type = self.request.GET.get('server_type', '')
+        self.server_id = self.request.GET.get('server_id', '')
+        self.action = self.request.GET.get('action', '')
 
-
-class ConfigControllerClass(object):
-
-    def getAppDirs(self, request):
+    def judge_args(self):
+        # 判断前端传来的参数
+        if self.project_id == '' or self.env_id == '' or self.app_id == '' or self.ip == ''\
+                or self.action == ''or self.server_type == '' or self.server_id == '':
+            # print('p_id,e_id,a_id,ip,action,server_type,server_id,',self.project_id,self.env_id,self.app_id,self.ip,self.action,self.server_type,self.server_id)
+            print('invaild action args from web...')
+            runlog.error("[ERROR] --wrong action args from web-----, Catch exception:, file: [ %s ], line: [ %s ]"
+                        %(__file__,sys._getframe().f_lineno))
+            return False
+        return True
+    def judge_permission(self):
+        if not pub.hasAccessPermission(self.uid, self.server_type, self.server_id):
+            # print('no permission')
+            runlog.error("--no permission to access the config_file from web-----, Catch exception:, file: [ %s ], line: [ %s ]"
+                        %(__file__,sys._getframe().f_lineno))
+            return False
+        return True
+    def getAppDirs(self):
         '''
         返回树形的目录结构数据
         1、同步script/functions ${HOME}/op/ 下
@@ -46,6 +75,20 @@ class ConfigControllerClass(object):
                 'icon' : 'jstree-file',
             }
         ]
+        # 如果遇到错误默认返回的内容
+        default_res = [{
+                            'text': '获取文件目录结构失败',
+                            'type': 'file',
+                            'icon': 'jstree-file',
+                         }]
+        # 判断传入参数 和 权限判断
+        if not self.judge_args() or not self.judge_permission():
+            return default_res
+        # 查找出当前app的相关信息
+        app_res, app_res_status = self.AppConfigDetail(self.server_type, self.app_id, self.server_id, self.env_id, self.project_id)
+        if not app_res_status:
+            return default_res
+
 
         t_pt = ParamikoTool()
         cmds = [['chmod', '+x', '/home/beehive/test/script/bin'],
@@ -60,6 +103,8 @@ class ConfigControllerClass(object):
             if len(ret_data) < cmd_len:  # 命令未全部执行完就已经报错
                 print('cmd: [ %s ], error_info: [ %s ]' %
                       (cmds[ret_data_len - 1], ret_data[ret_data_len - 1][1]))
+                runlog.error("[ERROR] chmod command exec error, Catch exception:, file: [ %s ], line: [ %s ]" % (
+                    __file__, sys._getframe().f_lineno))
                 return [{
                             'text': '获取文件目录结构失败',
                             'type': 'file',

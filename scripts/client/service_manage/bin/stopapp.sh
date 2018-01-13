@@ -73,6 +73,11 @@ check(){
     if [ ! -f "${LOG_FILE}" ];then
         > "${LOG_FILE}"
     fi
+    chmod 777 ${LOG_DIR} -R && chmod 777 ${TEMP_DIR} -R
+    if [ $? -ne 0 ];then
+        log_echo "[error]" "${func}" "Run cmds failed, cmds=[ chmod 777 ${LOG_DIR} -R && chmod 777 ${TEMP_DIR} -R  ], please check."
+        return 1
+    fi
     log_echo "[info]" "Exit func ${func} with successed."
     return 0
 }

@@ -118,14 +118,6 @@ class GetProjectModelClass(BaseDbModelClass):
         except Exception as e:
             dblog.error("[ERROR] Query error, Catch exception:[ %s ], file: [ %s ], line: [ %s ]" % (e, __file__, sys._getframe().f_lineno))
 
-        # for i in r_list:  # 对查找的系统进行去重
-        #     if i not in r_list_final:
-        #         r_list_final.append(i)
-        # dblog.info("r_list last: %s,file: [ %s ], line: [ %s ]" % (
-        #     json.dumps(r_list_final, indent=4), __file__, sys._getframe().f_lineno))
-        # dblog.info("Exit getProjectInfo with successed, file: [ %s ], line: [ %s ]" % (
-        #     __file__, sys._getframe().f_lineno))
-
         # 通过user-组-权限-机器-应用-系统来获取对应的系统列表
         m_list=[]
         sql = '''select DISTINCT f.code 

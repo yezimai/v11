@@ -8,8 +8,6 @@ from op_app.Model.base.operation_dbModelClass import Operation_dbModelClass
 
 
 class DownloadLogControllerClass(object):
-
-    # 检测是否有session 构造函数
     def __init__(self, request):
         self.request = request
         self.uid = self.request.user.id

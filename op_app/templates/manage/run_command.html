@@ -6,16 +6,220 @@
     <title>运维平台-管理-执行脚本命令页面</title>
 
     <link rel="icon" href="{% static 'img/run_command.png' %}" type="image/x-icon">
+
+
+    <link href="https://magicbox.bkclouds.cc/static_api/v3/assets/bootstrap-3.3.4/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'static/assets/bk/css/bk.css' %}">
 
+    <link href="https://magicbox.bkclouds.cc/static_api/v3/bk/css/base/common.css" rel="stylesheet">
+    <link href="https://magicbox.bkclouds.cc/static_api/v3/bk/css/components/button.css" rel="stylesheet">
+    <link href="https://magicbox.bkclouds.cc/static_api/v3/assets/fontawesome/css/font-awesome.min.css" rel="stylesheet">
+    <link href="{% static 'static/assets/artDialog-6.0.4/css/ui-dialog.css' %}" rel="stylesheet">
+    <link href="{% static 'static/assets/toastr-2.1.2/toastr.min.css' %}" rel="stylesheet">
+
+    <style type="text/css">
+        body{
+            padding: 20px 20px 0 20px;
+        }
+        .clear {
+            clear: both;
+        }
+        .click-dir {
+            cursor: pointer;
+            display: inline-block;
+            padding: 5px;
+            border: 1px solid #ccc;
+        }
+        .selected {
+            background: #ccc;
+        }
+
+        .info{
+            color: #666;
+            //min-height:120px;
+            width: 100%;
+            //border-bottom: 1px solid #ccc;
+        }
+        .info-detail {
+            float: left;
+            margin: 0 50px 10px 0;
+        }
+        .content {
+            color: green;
+        }
+        .disable-content {
+            color: red;
+        }
+        .tab-pane{
+            min-height: 40px;
+            padding: 15px 50px 15px 15px;
+        }
+
+        .cmds-main{
+            min-height: 150px;
+            border-bottom: 1px solid #ccc;
+            padding: 0 0 15px 0;
+            position: relative;
+        }
+        .cmds-main p{
+            //line-height: 0.6;
+            position: absolute;
+            top:0;
+            left: 0;
+        }
+        .cmds-main .cmds-content{
+            width: 66%;
+            height: 120px;
+            position: absolute;
+            top:22px;
+            left: 0;
+            resize:none;
+            color: #666;
+            padding: 5px;
+            line-height: 1.5;
+        }
+        .cmds-main .btns{
+            position: absolute;
+            top: 50%;
+            right: 12%;
+        }
+        .cmds-main .btns button{
+            margin: 0 30px 0 0;
+        }
+
+        .cmds-result-main {
+            margin: 10px 0 0 0;
+            float:left;
+        }
+        .cmds-result-main .cmds-result-content {
+            min-height: 360px;
+            //width: 76%;
+            width: 960px;
+            resize:none;
+            background-color: #eee;
+            color: #666;
+        }
+
+        .cmds-history{
+            float: right;
+            width: 320px;
+            //border: 1px solid green;
+            margin: 10px 10px 0 0;
+        }
+        .cmds-history .history-title{
+        }
+
+        .list-group-item {
+            cursor: pointer;
+        }
+    </style>
 
 </head>
 <body>
-
-    <div class="king-exception-box king-403-page">
-        <img src="https://magicbox.bk.tencent.com/static_api/v3/components/exception_building/images/building.png">
-        <h1>执行脚本命令页面正在建设中...</h1>
-        <!--<a href="javascript:;" class="king-btn king-info">立即跳转</a>-->
+    <div class="info">
+        <div class="tab-box" id="myTab1">
+            <ul class="nav nav-tabs">
+                <li class="active"><a href="#tab1_1" data-toggle="tab">基本信息</a></li>
+                <!--<li><a href="#tab1_2" data-toggle="tab">可执行的目录</a></li>-->
+                <li><a href="#tab1_3" data-toggle="tab">可执行的命令</a></li>
+                <li><a href="#tab1_4" data-toggle="tab">禁用的命令</a></li>
+                <li><a href="#tab1_5" data-toggle="tab">禁用查看的文件</a></li>
+            </ul>
+            <div class="tab-content mb20">
+                <div class="tab-pane fade in active" id="tab1_1">
+                    <div class="info-detail">
+                        <span class="title"><strong>服务器IP:</strong></span>&nbsp;&nbsp;
+                        <span class="content">{{ data.info.ip }}</span>
+                    </div>
+                    <div class="info-detail">
+                        <span class="title"><strong>执行用户:</strong></span>&nbsp;&nbsp;
+                        <span class="content">{{ data.info.user }}</span>
+                    </div>
+                    <div class="info-detail">
+                        <span class="title"><strong>选择执行目录:</strong></span>&nbsp;&nbsp;
+                        {% for e_dir in data.info.exec_dirs %}
+                            {% if forloop.first %}
+                                <span class="content click-dir selected" value="{{e_dir.id}}" >{{ e_dir.dir }}</span>&nbsp;&nbsp;
+                            {% else %}
+                                <span class="content click-dir" value="{{e_dir.id}}" >{{ e_dir.dir }}</span>&nbsp;&nbsp;
+                            {% endif %}
+                        {% empty %}
+                            <span class="content disable-content">没有查看目录的权限</span>
+                        {% endfor %}
+                    </div>
+                    <div class="clear"></div>
+                </div>
+                <div class="tab-pane fade" id="tab1_2">
+                    <!--<div class="info-detail">-->
+                    <!--</div>-->
+                </div>
+                <div class="tab-pane fade" id="tab1_3">
+                    <!--<div class="info-detail">-->
+                        {% for e_cmd in data.info.exec_cmds %}
+                            <span class="content">{{ e_cmd }}</span>&nbsp;&nbsp;
+                        {% empty %}
+                            <span class="content disable-content">没有可执行的命令</span>
+                        {% endfor %}
+                    <!--</div>-->
+                </div>
+                <div class="tab-pane fade" id="tab1_4">
+                    <!--<div class="info-detail">-->
+                        {% for e_cmd in data.info.disable_cmds %}
+                            <span class="content disable-content">{{ e_cmd }}</span>&nbsp;&nbsp;
+                        {% empty %}
+                            <span class="content">没有禁用的命令</span>
+                        {% endfor %}
+                    <!--</div>-->
+                </div>
+                <div class="tab-pane fade" id="tab1_5">
+                    <!--<div class="info-detail">-->
+                        {% for e_filename in data.info.disable_show_files %}
+                            <span class="content disable-content">{{ e_filename }}</span>&nbsp;&nbsp;
+                        {% empty %}
+                            <span class="content">没有不可查看的文件</span>
+                        {% endfor %}
+                    <!--</div>-->
+                </div>
+            </div>
+        </div>
     </div>
+
+    <div class="cmds-main">
+        <p class="cmds-title">请输入执行的命令:</p>
+        <textarea class="cmds-content">
+cd /home/bqadm
+ls ./</textarea>
+        <div class="btns">
+            <button id="clear" class="king-btn-demo king-btn king-radius king-info" >清空</button>
+            <button id="exec" class="king-btn-demo king-btn king-radius king-danger" >执行</button>
+        </div>
+    </div>
+
+    <div class="cmds-result-main">
+        <span class="cmds-result-title"></span>
+        <textarea class="cmds-result-content" readonly="readonly"></textarea>
+    </div>
+
+    <div class="cmds-history">
+        <p class="history-title">最近7条命令:</p>
+        <div class="list-group">
+            <a class="list-group-item" cmds="cd /home/bqadm adsfasdf adfasdfasdfasdfasdf" >cd /home/bqadm...</a>
+            <!--<a type="button" class="list-group-item" cmds="cd /home/bqadm2">adfasdfasdfasdfasdf</a>-->
+            <!--<a type="button" class="list-group-item" cmds="cd /home/bqadm3">Morbi leo </a>-->
+            <!--<a type="button" class="list-group-item" cmds="cd /home/bqadm4">Porta ac consectetur </a>-->
+            <!--<a type="button" class="list-group-item" cmds="cd /home/bqadm5">Vestibulum at1 </a>-->
+            <!--<a type="button" class="list-group-item" cmds="cd /home/bqadm6">Vestibulum at2 </a>-->
+            <!--<a type="button" class="list-group-item" cmds="cd /home/bqadm7">Vestibulum at3 </a>-->
+            <!--<a type="button" class="list-group-item" cmds="cd /home/bqadm8">Vestibulum at4 </a>-->
+        </div>
+    </div>
+    <div class="clear"></div>
 </body>
+
+<script src="{% static 'static/assets/js/jquery-1.10.2.min.js' %}"></script>
+<script src="{% static 'static/assets/bootstrap-3.3.4/js/bootstrap.min.js' %}"></script>
+<script src="{% static 'static/assets/toastr-2.1.2/toastr.min.js' %}"></script>
+<script src="{% static 'static/assets/artDialog-6.0.4/dist/dialog-min.js' %}"></script>
+<script src="{% static 'js/run_command.js' %}"></script>
+
 </html>

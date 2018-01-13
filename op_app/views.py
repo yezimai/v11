@@ -356,7 +356,52 @@ def doFunctionPage(request):
         }
         return render(request, 'manage/task_manage.html', {'data': data})
     elif action == 'run_command':  # 命令执行
-        return render(request, 'manage/run_command.html', {'data': 'test run_command'})
+        data = {
+            'project_id': project_id,
+            'env_id': env_id,
+            'app_id': app_id,
+            'server_type': server_type,
+            'server_id': server_id,
+            'info': {
+                'ip': '10.0.0.2',
+                'user': 'beehive',
+                'exec_dirs': [  # 可以查看的目录
+                    {
+                        'id': 10,
+                        'dir': '/usr/local/tomcat/8080',
+                    },{
+                        'id': 11,
+                        'dir': '/usr/local/tomcat/8081',
+                    },{
+                        'id': 12,
+                        'dir': '/usr/local/tomcat/8082',
+                    },{
+                        'id': 13,
+                        'dir': '/usr/local/tomcat/8083',
+                    },{
+                        'id': 14,
+                        'dir': '/usr/local/tomcat/8084',
+                    }
+                ],
+                'exec_cmds': ['ls', 'cat', 'tail', 'head'],  # 可以执行的命令
+                'disable_cmds': ['rm', 'mv', 'vi', 'vim', '>'],  # 禁用的命令
+                'disable_show_files': ['dbconfig.properties'],  # 禁用查看的文件名称
+                'historys': [{
+                    'all_cmds': '''
+cd /home/bqadm
+ls ./
+                    ''',  # 命令的所有内容
+                    'cut_cmd': 'cd /home/bqadm'    # 截取命令的前面28个英文字符的内容
+                },{
+                    'all_cmds': '''
+cd /home/bqadm
+ls ./
+                    ''',  # 命令的所有内容
+                    'cut_cmd': 'cd /home/bqadm'    # 截取命令的前面28个英文字符的内容
+                }]
+            }
+        }
+        return render(request, 'manage/run_command.html', {'data': data})
     elif action == 'configuration':  # 配置文件更改
         data = {}
         data['remote_dir'] = '/config/HCS20170814'
@@ -556,30 +601,30 @@ def getCrontabContent(request):
 
 def getAppDirs(request):
 
-    c_config = ConfigControllerClass()
-    return JsonResponse(c_config.getAppDirs(request), safe=False)
+    c_config = ConfigControllerClass(request)
+    return JsonResponse(c_config.getAppDirs(), safe=False)
 def getFileContent(request):
-    c_config = ConfigControllerClass()
-    return JsonResponse(c_config.getFileContent(request), safe=False)
+    c_config = ConfigControllerClass(request)
+    return JsonResponse(c_config.getFileContent(), safe=False)
 def dealUploadFile(request):
-    c_config = ConfigControllerClass()
-    is_ok = c_config.dealUploadFile(request)
+    c_config = ConfigControllerClass(request)
+    is_ok = c_config.dealUploadFile()
     return JsonResponse(is_ok, safe=False)
 def renameDirOrFile(request):
-    c_config = ConfigControllerClass()
-    is_ok = c_config.renameDirOrFile(request)
+    c_config = ConfigControllerClass(request)
+    is_ok = c_config.renameDirOrFile()
     return JsonResponse(is_ok, safe=False)
 def sshCreateFolder(request):
-    c_config = ConfigControllerClass()
-    is_ok = c_config.sshCreateFolder(request)
+    c_config = ConfigControllerClass(request)
+    is_ok = c_config.sshCreateFolder()
     return JsonResponse(is_ok, safe=False)
 def saveFileContent(request):
-    c_config = ConfigControllerClass()
-    is_ok = c_config.saveFileContent(request)
+    c_config = ConfigControllerClass(request)
+    is_ok = c_config.saveFileContent()
     return JsonResponse(is_ok, safe=False)
 def removeDirOrFile(request):
-    c_config = ConfigControllerClass()
-    is_ok = c_config.removeDirOrFile(request)
+    c_config = ConfigControllerClass(request)
+    is_ok = c_config.removeDirOrFile()
     return JsonResponse(is_ok, safe=False)
 
 

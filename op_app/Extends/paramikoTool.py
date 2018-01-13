@@ -100,6 +100,7 @@ class ParamikoTool(object):
             err = stderr.read()  # 标准错误输出
             try:
                 if err != '':
+                    print('errrrr------>\033[32;1m%s\033[0m' %err)
                     return False
                 else:
                     return True

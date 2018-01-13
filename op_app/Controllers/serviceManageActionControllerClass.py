@@ -29,8 +29,8 @@ class ManageActionControllerClass(object):
             return False
         #  根据项目、环境、应用、ip对对应的部署在此机器上的应用信息
         instance = appConfigDetailClass.appConfigDetail()
-        res, res_status = instance.AppConfigDetail(self.server_type, self.app_id, self.server_id,\
-                                        self.env_id, self.project_id)
+        res, res_status = instance.AppConfigDetail(self.server_type, self.app_id, self.server_id, self.env_id, \
+                                                   self.project_id)
         if not res_status:
             runlog.error("the APP Data is null, file: [ %s ], line: [ %s ]" % (
                             __file__, sys._getframe().f_lineno))
@@ -57,13 +57,17 @@ class ManageActionControllerClass(object):
                         %(__file__,sys._getframe().f_lineno))
             return False
         # print('123123123',res_dic)
-        config_status = self.ConfigFile(self.ip, **res_dic)
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+        rsyncScriptPath = '{}{}'.format(current_dir, '/../../scripts/server/bin/execRsync.exp')
+        app_path = '{}{}{}/{}'.format(current_dir, '/../../tasks/service_manage/', self.ip, res_dic['app_name'])
+        config_status = self.ConfigFile(self.ip, current_dir, **res_dic)
         if config_status:  # 配置文件构建成功
-            if self.rsyncFile(self.ip,**res_dic) :   # 同步文件到远程机器
+            remote_dir, status = self.rsyncFile(self.ip, app_path, rsyncScriptPath, **res_dic)  # 同步文件到远程机器
+            if status:
                 # print('rsync-succ----->\033[31;1m\033[0m')
                 runlog.info("---rsync-file to remote-success----:file: [ %s ], line: [ %s ]" % (
                     __file__, sys._getframe().f_lineno))
-                exec_dir = '{}/{}/{}'.format(self.remote_dir, res_dic['app_name'], 'scripts/bin/')  # 远程执行的目录
+                exec_dir = '{}/{}/{}'.format(remote_dir, res_dic['app_name'], 'scripts/bin/')  # 远程执行的目录
                 # 在bqadm家目录权限设为777
                 # mkdir_cmd = "chmod 777 -R {}".format(remote_home)
                 # mkdir_res = self.pt.execCommand(ip, username, sshport, password, mkdir_cmd)
@@ -71,11 +75,11 @@ class ManageActionControllerClass(object):
 
                     # cmd = 'cd {}&&chmod a+x *.sh&&nohup ./startapp.sh 1>/dev/null 2>&1 &&sleep 10&&ps -ef|grep {}|grep {}|grep -v grep|wc -l' \
                     #     .format(exec_dir, res_dic['appdir'], res_dic['install_user'])
-                    cmd = 'chmod 777 -R {};sudo su - {} -c "cd {}&&nohup ./startapp.sh 1>/dev/null 2>&1"'\
-                            .format(self.remote_dir, res_dic['install_user'], exec_dir)
+                    cmd = 'chmod 777 -R {};sudo su - {} -c "cd {}&&./startapp.sh 1>/dev/null 2>&1"'\
+                            .format(remote_dir, res_dic['install_user'], exec_dir)
                 elif self.action == 'stop':
                     cmd = 'chmod 777 -R {};sudo su - {} -c "cd {}&&./stopapp.sh 1>/dev/null 2>&1"'\
-                            .format(self.remote_dir, res_dic['install_user'], exec_dir)
+                            .format(remote_dir, res_dic['install_user'], exec_dir)
                 else:  # action参数无效时
                     runlog.error("[ERROR] --invaild-action------, Catch exception:, file: [ %s ], line: [ %s ]"
                                 % (__file__,sys._getframe().f_lineno))
@@ -96,11 +100,10 @@ class ManageActionControllerClass(object):
             return False
 
 
-    def ConfigFile(self, ip, **r_dic):  # 构建配置文件
-        current_dir = os.path.dirname(os.path.abspath(__file__))
+    def ConfigFile(self, ip, current_dir,  **r_dic):  # 构建配置文件
         config_dir = '{}{}{}{}{}{}'.format(current_dir, '/../../tasks/service_manage/', ip, '/',  r_dic['app_name'], '/scripts')
-        self.app_path = '{}{}{}/{}'.format(current_dir, '/../../tasks/service_manage/', ip, r_dic['app_name'])
-        self.rsyncScriptPath = '{}{}'.format(current_dir, '/../../scripts/server/bin/execRsync.exp')
+        # app_path = '{}{}{}/{}'.format(current_dir, '/../../tasks/service_manage/', ip, r_dic['app_name'])
+        print('CONFIGGGGG',config_dir)
         if not os.path.exists(config_dir):
             try:
                 for i in ['/bin', '/conf']:
@@ -111,7 +114,6 @@ class ManageActionControllerClass(object):
                 return False
         # 将最新source_dir下的start，stop脚本复制到config_dir
         source_dir = '{}{}'.format(current_dir, '/../../scripts/client/service_manage/bin')
-
         try:
             for file in os.listdir(source_dir):  # 获取目标文件夹的文件列表信息
                 source_file = os.path.join(source_dir, file)
@@ -153,40 +155,41 @@ class ManageActionControllerClass(object):
             return False
         return True
 
-    def rsyncFile(self, ip, **r_dic):
+    def rsyncFile(self, ip, app_path, rsyncScriptPath, **r_dic):
         username, sshport, password = r_dic['sshuser'], r_dic['sshport'], r_dic['pass']
-        # 利用rsync脚本将配置文件和启动脚本推送过去,rsync可以自动创建文件夹，所以注释掉上面的代码
+        # 利用rsync脚本将配置文件和启动脚本推送过去,rsync可以自动创建文件夹
 
         # self.remote_dir = '{}/{}/{}/'.format('/home', username, 'service_manage')
-        chmod_cmd = [['chmod', '+x', self.rsyncScriptPath]]
+        chmod_cmd = [['chmod', '+x', rsyncScriptPath]]
         if pub.execShellCommand(*chmod_cmd) == False:
             runlog.error("Exec chmod_cmd command error, file: [ %s ], line: [ %s ]" % (
                             __file__, sys._getframe().f_lineno))
-            return False
+            return ['', False]
         # 寻找服务器的家目录的命令
         remote_home_dir_cmd = [["grep", "^{}:".format(username), "/etc/passwd|awk -F ':' '{print $6}'"]]
-        output_lst = self.pt.execCommandInRemoteHostOutput(self.ip, username, sshport, password, *remote_home_dir_cmd)
+        output_lst = self.pt.execCommandInRemoteHostOutput(ip, username, sshport, password, *remote_home_dir_cmd)
         print('oooouuutttpputt------>\033[42;1m%s\033[0m' %output_lst)
         if output_lst[0][0] != 0:
-            return False
+            return ['', False]
         remote_home = output_lst[0][1][:-1]  #remot_home = /home/bqadm
         print('rrrrrrr_home',remote_home)
 
         # print('remote_home_dir_cmd',remote_home_dir_cmd,type(remote_home_dir_cmd),len(remote_home_dir_cmd))
         # /home/bqadm
 
-        self.remote_dir = '{}/service_manage'.format(remote_home)
-        connect_args = [ip, username, sshport, password, self.app_path, self.remote_dir]
-        if pub.rsyncServerToClients(self.rsyncScriptPath, *connect_args) != True:
+        remote_dir = '{}/service_manage'.format(remote_home)
+        connect_args = [ip, username, sshport, password, app_path, remote_dir]
+        if pub.rsyncServerToClients(rsyncScriptPath, *connect_args) != True:
             runlog.error("[ERROR] rsync file to client error, Catch exception:, file: [ %s ], line: [ %s ]" % (
                 __file__, sys._getframe().f_lineno))
-            return False
-        return True
+            return ['', False]
+        return [remote_dir, True]
 
     def runScript(self, ip, cmd, **r_dic):
         username, sshport, password = r_dic['sshuser'], r_dic['sshport'], r_dic['pass']
 
         status = self.pt.execCommand(ip, username, sshport, password, cmd)
+        # print 'status',status
         if status:
             runlog.info("--script execute-success--:file: [ %s ], line: [ %s ]" % (
                 __file__, sys._getframe().f_lineno))
